@@ -40,6 +40,7 @@ def stk_push(phone, amount, account_ref, description):
     token     = mpesa_token()
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     password  = base64.b64encode(f"{SHORTCODE}{PASSKEY}{timestamp}".encode()).decode()
+    callback  = CALLBACK_URL or "https://uniform-shop-pos-1.onrender.com/mpesa/callback"
     payload = {
         "BusinessShortCode": SHORTCODE,
         "Password":          password,
@@ -49,7 +50,7 @@ def stk_push(phone, amount, account_ref, description):
         "PartyA":            phone,
         "PartyB":            SHORTCODE,
         "PhoneNumber":       phone,
-        "CallBackURL":       CALLBACK_URL,
+        "CallBackURL":       callback,
         "AccountReference":  account_ref,
         "TransactionDesc":   description
     }
@@ -58,7 +59,6 @@ def stk_push(phone, amount, account_ref, description):
         json=payload, headers={"Authorization": f"Bearer {token}"}, timeout=15
     )
     return r.json()
-
 pending = {}
 
 @app.route("/")
