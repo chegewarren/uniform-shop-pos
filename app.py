@@ -77,12 +77,18 @@ def get_products():
             name = row[1].strip()
             if not name:
                 continue
-            try: stock = int(str(row[7]).replace(",","")) if row[7] else 0
-            except: stock = 0
-            try: price = int(str(row[4]).replace(",","")) if row[4] else 0
-            except: price = 0
-            try: reorder = int(str(row[8]).replace(",","")) if row[8] else 0
-            except: reorder = 0
+            try:
+                stock = int(str(row[5]).replace(",","")) if row[5] else 0
+            except:
+                stock = 0
+            try:
+                price = int(str(row[4]).replace(",","")) if row[4] else 0
+            except:
+                price = 0
+            try:
+                reorder = int(str(row[6]).replace(",","")) if row[6] else 0
+            except:
+                reorder = 0
             products.append({
                 "row": i, "id": row[0], "name": name,
                 "category": row[2], "price": price,
@@ -175,6 +181,17 @@ def _record_sale(sale, mpesa_code):
         ]])
         print(f"[SALE] {txn_id} — {p['name']} x{sale['qty']} = KES {sale['amount']} | {mpesa_code}")
     except Exception as e:
+        # Deduct stock from Inventory
+        inv_data = sheets_get("Inventory!A3:F200")
+        inv_rows = inv_data.get("values", [])
+        for idx, inv_row in enumerate(inv_rows, start=3):
+            while len(inv_row) < 6:
+                inv_row.append("")
+            if inv_row[1].strip().lower() == p["name"].strip().lower():
+                current = int(str(inv_row[5]).replace(",","")) if inv_row[5] else 0
+                new_stock = max(0, current - sale["qty"])
+                sheets_update(f"Inventory!F{idx}", [[new_stock]])
+                break
         print(f"[ERROR] {e}")
 
 if __name__ == "__main__":
