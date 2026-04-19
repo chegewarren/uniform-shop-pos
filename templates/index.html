@@ -505,9 +505,13 @@ function selectProduct(p) {
 }
 
 function changeQty(d) {
-  qty = Math.max(1, qty + d);
+  const maxStock = parseInt(selectedProduct.stock) || 0;
+  qty = Math.max(1, Math.min(qty + d, maxStock));
   document.getElementById('qtyVal').textContent = qty;
   updateTotal();
+  if (qty >= maxStock) {
+    showToast(`⚠️ Maximum stock reached (${maxStock} available)`, 'error');
+  }
 }
 
 function updateTotal() {
@@ -522,6 +526,10 @@ async function initiatePayment() {
   const customer = document.getElementById('customerName').value.trim() || 'Walk-in';
   if (!phone) { showToast('Please enter a phone number', 'error'); return; }
   if (!selectedProduct) { showToast('Please select a product', 'error'); return; }
+  if (qty > parseInt(selectedProduct.stock)) { 
+    showToast(`❌ Not enough stock! Only ${selectedProduct.stock} available.`, 'error'); 
+    return; 
+  }
 
   document.getElementById('payBtn').disabled = true;
   showModal('waiting', phone, selectedProduct.price * qty);
