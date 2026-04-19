@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Uniform Shop — Point of Sale</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --navy:   #0f1e3d;
+  --navy2:  #162850;
+  --gold:   #f0a500;
+  --gold2:  #ffc93c;
+  --green:  #00c48c;
+  --red:    #ff4d6d;
+  --bg:     #080f20;
+  --card:   #111d38;
+  --card2:  #162040;
+  --border: #1e2f52;
+  --text:   #e8edf8;
+  --muted:  #6b7fa8;
+  --white:  #ffffff;
+  --font:   'Sora', sans-serif;
+  --mono:   'JetBrains Mono', monospace;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Top bar ── */
+.topbar {
+  background: var(--navy);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+}
+.topbar-brand {
+  display: flex; align-items: center; gap: 12px;
+}
+.topbar-logo {
+  width: 36px; height: 36px; background: var(--gold);
+  border-radius: 10px; display: flex; align-items: center;
+  justify-content: center; font-size: 18px;
+}
+.topbar-name {
+  font-size: 16px; font-weight: 700; letter-spacing: 0.3px;
+}
+.topbar-sub { font-size: 11px; color: var(--muted); }
+.topbar-time {
+  font-family: var(--mono); font-size: 13px; color: var(--gold);
+}
+.topbar-status {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--muted);
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+  animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+
+/* ── Layout ── */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 0;
+  height: calc(100vh - 60px);
+}
+
+/* ── Left: Product panel ── */
+.products-panel {
+  padding: 24px;
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+}
+.panel-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.panel-title { font-size: 18px; font-weight: 700; }
+.search-box {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 12px; padding: 10px 16px; width: 260px;
+}
+.search-box input {
+  background: none; border: none; outline: none;
+  color: var(--text); font-family: var(--font); font-size: 14px; width: 100%;
+}
+.search-box span { color: var(--muted); font-size: 16px; }
+
+.cats {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
+}
+.cat-btn {
+  padding: 6px 16px; border-radius: 20px; border: 1px solid var(--border);
+  background: var(--card); color: var(--muted); font-family: var(--font);
+  font-size: 12px; font-weight: 500; cursor: pointer; transition: all .2s;
+}
+.cat-btn.active, .cat-btn:hover {
+  background: var(--gold); color: var(--navy); border-color: var(--gold);
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 14px;
+}
+
+.product-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px 16px;
+  cursor: pointer;
+  transition: all .2s;
+  position: relative;
+  overflow: hidden;
+}
+.product-card:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(240,165,0,.15);
+}
+.product-card.selected {
+  border-color: var(--gold);
+  background: #1a2a10;
+}
+.product-card.out-of-stock {
+  opacity: .4; pointer-events: none;
+}
+.product-emoji { font-size: 28px; margin-bottom: 10px; }
+.product-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; line-height: 1.3; }
+.product-cat  { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+.product-price {
+  font-family: var(--mono); font-size: 16px; font-weight: 700; color: var(--gold);
+}
+.product-stock {
+  position: absolute; top: 12px; right: 12px;
+  font-size: 10px; font-family: var(--mono);
+  background: var(--bg); border-radius: 6px; padding: 3px 7px;
+  color: var(--muted);
+}
+.product-stock.low { color: var(--red); }
+
+/* ── Right: Checkout panel ── */
+.checkout-panel {
+  background: var(--card);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.checkout-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 16px; font-weight: 700;
+}
+.checkout-body {
+  flex: 1; overflow-y: auto; padding: 20px 24px;
+}
+
+/* ── Selected item ── */
+.selected-item {
+  background: var(--card2); border: 1px solid var(--border);
+  border-radius: 14px; padding: 16px; margin-bottom: 20px;
+  display: none;
+}
+.selected-item.visible { display: block; }
+.si-name { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+.si-cat  { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+.si-row  {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.si-label { font-size: 13px; color: var(--muted); }
+.qty-ctrl {
+  display: flex; align-items: center; gap: 10px;
+}
+.qty-btn {
+  width: 30px; height: 30px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--bg);
+  color: var(--text); font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.qty-btn:hover { background: var(--gold); color: var(--navy); border-color: var(--gold); }
+.qty-val { font-family: var(--mono); font-size: 16px; font-weight: 600; min-width: 24px; text-align: center; }
+.si-price { font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--gold); }
+
+/* ── Form fields ── */
+.form-group { margin-bottom: 16px; }
+.form-label { font-size: 12px; color: var(--muted); font-weight: 500; margin-bottom: 6px; display: block; }
+.form-input {
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 10px; padding: 11px 14px; color: var(--text);
+  font-family: var(--font); font-size: 14px; outline: none;
+  transition: border-color .2s;
+}
+.form-input:focus { border-color: var(--gold); }
+.form-input::placeholder { color: var(--muted); }
+
+/* ── Pay button ── */
+.pay-btn {
+  width: 100%; padding: 15px; border: none; border-radius: 14px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  color: var(--navy); font-family: var(--font); font-size: 15px;
+  font-weight: 700; cursor: pointer; transition: all .2s;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  letter-spacing: 0.3px;
+}
+.pay-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(240,165,0,.35); }
+.pay-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.no-selection {
+  text-align: center; padding: 40px 20px; color: var(--muted);
+}
+.no-selection .icon { font-size: 48px; margin-bottom: 12px; }
+.no-selection p { font-size: 14px; }
+
+/* ── Payment modal ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.7); backdrop-filter: blur(6px);
+  z-index: 200; align-items: center; justify-content: center;
+}
+.modal-overlay.show { display: flex; }
+.modal {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 24px; padding: 36px; width: 420px; max-width: 95vw;
+  text-align: center; animation: slideUp .3s ease;
+}
+@keyframes slideUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+.modal-icon { font-size: 56px; margin-bottom: 16px; }
+.modal-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.modal-sub { font-size: 14px; color: var(--muted); margin-bottom: 28px; line-height: 1.6; }
+.modal-phone {
+  font-family: var(--mono); font-size: 20px; color: var(--gold);
+  background: var(--bg); border-radius: 12px; padding: 12px 20px;
+  margin-bottom: 8px; letter-spacing: 2px;
+}
+.modal-amount {
+  font-family: var(--mono); font-size: 28px; font-weight: 700;
+  color: var(--green); margin-bottom: 28px;
+}
+.spinner {
+  width: 40px; height: 40px; border: 3px solid var(--border);
+  border-top-color: var(--gold); border-radius: 50%;
+  animation: spin 1s linear infinite; margin: 0 auto 20px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.success-check {
+  width: 70px; height: 70px; background: var(--green);
+  border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 32px; margin: 0 auto 20px;
+  animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
+.fail-x {
+  width: 70px; height: 70px; background: var(--red);
+  border-radius: 50%; display: flex; align-items: center;
+  justify-content: center; font-size: 32px; margin: 0 auto 20px;
+}
+
+.btn-outline {
+  padding: 12px 28px; border-radius: 12px;
+  border: 1px solid var(--border); background: none;
+  color: var(--text); font-family: var(--font); font-size: 14px;
+  cursor: pointer; transition: all .2s; margin: 4px;
+}
+.btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+.btn-primary {
+  padding: 12px 28px; border-radius: 12px; border: none;
+  background: var(--gold); color: var(--navy);
+  font-family: var(--font); font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: all .2s; margin: 4px;
+}
+.btn-primary:hover { background: var(--gold2); }
+
+/* ── Recent sales strip ── */
+.recent-sales {
+  border-top: 1px solid var(--border);
+  padding: 16px 24px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.rs-title { font-size: 12px; color: var(--muted); font-weight: 600;
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+.rs-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+}
+.rs-item:last-child { border-bottom: none; }
+.rs-name { font-weight: 500; }
+.rs-meta { color: var(--muted); font-size: 11px; }
+.rs-amount { font-family: var(--mono); color: var(--green); font-weight: 600; }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 14px 20px; font-size: 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.4);
+  transform: translateY(80px); opacity: 0;
+  transition: all .3s; z-index: 300; max-width: 320px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { border-color: var(--green); }
+.toast.error   { border-color: var(--red); }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">🏫</div>
+    <div>
+      <div class="topbar-name">School Uniforms POS</div>
+      <div class="topbar-sub">Point of Sale System</div>
+    </div>
+  </div>
+  <div class="topbar-status">
+    <div class="dot"></div>
+    <span>Live — synced to Google Sheets</span>
+  </div>
+  <div class="topbar-time" id="clock">--:--:--</div>
+</div>
+
+<!-- Main layout -->
+<div class="layout">
+
+  <!-- LEFT: Products -->
+  <div class="products-panel">
+    <div class="panel-header">
+      <div class="panel-title">Select Product</div>
+      <div class="search-box">
+        <span>🔍</span>
+        <input type="text" id="searchInput" placeholder="Search items…" oninput="filterProducts()"/>
+      </div>
+    </div>
+    <div class="cats" id="catButtons"></div>
+    <div class="products-grid" id="productsGrid">
+      <div style="color:var(--muted);padding:40px;grid-column:1/-1;text-align:center">
+        Loading products…
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Checkout -->
+  <div class="checkout-panel">
+    <div class="checkout-header">🛒 Checkout</div>
+    <div class="checkout-body">
+
+      <div class="no-selection" id="noSelection">
+        <div class="icon">👆</div>
+        <p>Select a product from the left<br>to begin a sale</p>
+      </div>
+
+      <div class="selected-item" id="selectedItem">
+        <div class="si-name" id="siName"></div>
+        <div class="si-cat"  id="siCat"></div>
+        <div class="si-row">
+          <span class="si-label">Quantity</span>
+          <div class="qty-ctrl">
+            <button class="qty-btn" onclick="changeQty(-1)">−</button>
+            <span class="qty-val" id="qtyVal">1</span>
+            <button class="qty-btn" onclick="changeQty(1)">+</button>
+          </div>
+        </div>
+        <div class="si-row">
+          <span class="si-label">Total</span>
+          <span class="si-price" id="siPrice">KES 0</span>
+        </div>
+      </div>
+
+      <div id="checkoutForm" style="display:none">
+        <div class="form-group">
+          <label class="form-label">Customer Name (optional)</label>
+          <input class="form-input" id="customerName" type="text" placeholder="e.g. Jane Njeri"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">M-Pesa Phone Number *</label>
+          <input class="form-input" id="phoneInput" type="tel"
+            placeholder="e.g. 0712 345 678" maxlength="13"/>
+        </div>
+        <button class="pay-btn" id="payBtn" onclick="initiatePayment()">
+          <span>📱</span> Send M-Pesa Prompt
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Recent sales -->
+    <div class="recent-sales">
+      <div class="rs-title">Recent Sales Today</div>
+      <div id="recentList">
+        <div style="color:var(--muted);font-size:13px">No sales yet today</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payment modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+let products = [], selectedProduct = null, qty = 1;
+let pollInterval = null;
+
+// ── Clock ───────────────────────────────────────────────────────
+function updateClock() {
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('en-KE', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(updateClock, 1000); updateClock();
+
+// ── Load products ───────────────────────────────────────────────
+async function loadProducts() {
+  try {
+    const r = await fetch('/api/products');
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error);
+    products = d.products;
+    renderCategories();
+    renderProducts(products);
+  } catch(e) {
+    document.getElementById('productsGrid').innerHTML =
+      `<div style="color:var(--red);padding:20px;grid-column:1/-1">Error loading products: ${e.message}</div>`;
+  }
+}
+
+const emojiMap = {
+  Tops:'👕', Bottoms:'👖', Outerwear:'🧥', Sportswear:'🩳',
+  Footwear:'👟', Accessories:'🎒'
+};
+
+function renderCategories() {
+  const cats = ['All', ...new Set(products.map(p => p.category).filter(Boolean))];
+  document.getElementById('catButtons').innerHTML = cats.map(c =>
+    `<button class="cat-btn ${c==='All'?'active':''}" onclick="filterCat('${c}',this)">${c}</button>`
+  ).join('');
+}
+
+function renderProducts(list) {
+  const grid = document.getElementById('productsGrid');
+  if (!list.length) {
+    grid.innerHTML = '<div style="color:var(--muted);padding:40px;grid-column:1/-1;text-align:center">No products found</div>';
+    return;
+  }
+  grid.innerHTML = list.map(p => {
+    const emoji  = emojiMap[p.category] || '📦';
+    const stock  = parseInt(p.stock) || 0;
+    const oos    = stock <= 0;
+    const lowCls = stock <= parseInt(p.reorder||0) ? 'low' : '';
+    return `
+    <div class="product-card ${oos?'out-of-stock':''} ${selectedProduct?.id===p.id?'selected':''}"
+         onclick="selectProduct(${JSON.stringify(p).replace(/"/g,'&quot;')})">
+      <div class="product-stock ${lowCls}">${oos?'OUT':'×'+stock}</div>
+      <div class="product-emoji">${emoji}</div>
+      <div class="product-name">${p.name}</div>
+      <div class="product-cat">${p.category}</div>
+      <div class="product-price">KES ${parseInt(p.price).toLocaleString()}</div>
+    </div>`;
+  }).join('');
+}
+
+function filterCat(cat, btn) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const list = cat === 'All' ? products : products.filter(p => p.category === cat);
+  renderProducts(list);
+}
+
+function filterProducts() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  renderProducts(products.filter(p => p.name.toLowerCase().includes(q)));
+}
+
+// ── Select product ──────────────────────────────────────────────
+function selectProduct(p) {
+  selectedProduct = p;
+  qty = 1;
+  document.getElementById('noSelection').style.display = 'none';
+  document.getElementById('selectedItem').classList.add('visible');
+  document.getElementById('checkoutForm').style.display = 'block';
+  document.getElementById('siName').textContent  = p.name;
+  document.getElementById('siCat').textContent   = p.category;
+  updateTotal();
+  renderProducts(products);
+  document.getElementById('phoneInput').focus();
+}
+
+function changeQty(d) {
+  qty = Math.max(1, qty + d);
+  document.getElementById('qtyVal').textContent = qty;
+  updateTotal();
+}
+
+function updateTotal() {
+  if (!selectedProduct) return;
+  const total = parseInt(selectedProduct.price) * qty;
+  document.getElementById('siPrice').textContent = 'KES ' + total.toLocaleString();
+}
+
+// ── Initiate M-Pesa payment ─────────────────────────────────────
+async function initiatePayment() {
+  const phone    = document.getElementById('phoneInput').value.trim();
+  const customer = document.getElementById('customerName').value.trim() || 'Walk-in';
+  if (!phone) { showToast('Please enter a phone number', 'error'); return; }
+  if (!selectedProduct) { showToast('Please select a product', 'error'); return; }
+
+  document.getElementById('payBtn').disabled = true;
+  showModal('waiting', phone, selectedProduct.price * qty);
+
+  try {
+    const r = await fetch('/api/pay', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ phone, customer, product: selectedProduct, qty })
+    });
+    const d = await r.json();
+    if (!d.ok) {
+      showModal('error', null, null, d.error);
+      document.getElementById('payBtn').disabled = false;
+      return;
+    }
+    // Start polling
+    pollPayment(d.checkout_id);
+  } catch(e) {
+    showModal('error', null, null, e.message);
+    document.getElementById('payBtn').disabled = false;
+  }
+}
+
+function pollPayment(ckid) {
+  let attempts = 0;
+  pollInterval = setInterval(async () => {
+    attempts++;
+    try {
+      const r = await fetch('/api/status/' + ckid);
+      const d = await r.json();
+      if (d.status === 'completed') {
+        clearInterval(pollInterval);
+        showModal('success');
+        document.getElementById('payBtn').disabled = false;
+        loadProducts();   // refresh stock
+        loadRecentSales();
+        // Reset form after 4s
+        setTimeout(() => {
+          closeModal();
+          selectedProduct = null; qty = 1;
+          document.getElementById('noSelection').style.display = '';
+          document.getElementById('selectedItem').classList.remove('visible');
+          document.getElementById('checkoutForm').style.display = 'none';
+          document.getElementById('phoneInput').value = '';
+          document.getElementById('customerName').value = '';
+          renderProducts(products);
+        }, 4000);
+      }
+    } catch {}
+    if (attempts >= 40) {   // 2 min timeout
+      clearInterval(pollInterval);
+      showModal('error', null, null, 'Payment timed out. Please try again.');
+      document.getElementById('payBtn').disabled = false;
+    }
+  }, 3000);
+}
+
+// ── Modals ──────────────────────────────────────────────────────
+function showModal(state, phone, amount, errMsg) {
+  const overlay = document.getElementById('modalOverlay');
+  const content = document.getElementById('modalContent');
+  overlay.classList.add('show');
+
+  if (state === 'waiting') {
+    content.innerHTML = `
+      <div class="modal-icon">📱</div>
+      <div class="modal-title">Awaiting Payment</div>
+      <div class="modal-sub">An M-Pesa prompt has been sent to</div>
+      <div class="modal-phone">${phone}</div>
+      <div class="modal-amount">KES ${parseInt(amount).toLocaleString()}</div>
+      <div class="spinner"></div>
+      <div style="color:var(--muted);font-size:13px">Ask the customer to enter their M-Pesa PIN on their phone</div>
+      <br/>
+      <button class="btn-outline" onclick="cancelPayment()">Cancel</button>
+    `;
+  } else if (state === 'success') {
+    content.innerHTML = `
+      <div class="success-check">✓</div>
+      <div class="modal-title">Payment Received!</div>
+      <div class="modal-sub">Transaction confirmed. The sale has been recorded in your Google Sheet and stock updated automatically.</div>
+      <div style="color:var(--green);font-family:var(--mono);font-size:22px;margin-bottom:20px">✅ PAID</div>
+    `;
+  } else if (state === 'error') {
+    content.innerHTML = `
+      <div class="fail-x">✕</div>
+      <div class="modal-title">Payment Failed</div>
+      <div class="modal-sub">${errMsg || 'Something went wrong. Please try again.'}</div>
+      <button class="btn-primary" onclick="closeModal()">Try Again</button>
+    `;
+  }
+}
+
+function cancelPayment() {
+  clearInterval(pollInterval);
+  closeModal();
+  document.getElementById('payBtn').disabled = false;
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+// ── Recent sales ────────────────────────────────────────────────
+async function loadRecentSales() {
+  try {
+    const r = await fetch('/api/sales');
+    const d = await r.json();
+    if (!d.ok) return;
+    const today = new Date().toLocaleDateString('en-GB');
+    const todaySales = d.sales.filter(s => {
+      const date = (s['Date'] || s['date'] || '').toString();
+      return date.includes(today.split('/')[0]);
+    }).slice(-8).reverse();
+
+    const list = document.getElementById('recentList');
+    if (!todaySales.length) {
+      list.innerHTML = '<div style="color:var(--muted);font-size:13px">No sales yet today</div>';
+      return;
+    }
+    list.innerHTML = todaySales.map(s => `
+      <div class="rs-item">
+        <div>
+          <div class="rs-name">${s['Item'] || s['item'] || '—'}</div>
+          <div class="rs-meta">${s['Customer Name'] || 'Walk-in'} · ×${s['Qty']||1}</div>
+        </div>
+        <div class="rs-amount">KES ${parseInt(s['Total Revenue (KES)']||0).toLocaleString()}</div>
+      </div>
+    `).join('');
+  } catch {}
+}
+
+// ── Toast ────────────────────────────────────────────────────────
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ── Init ─────────────────────────────────────────────────────────
+loadProducts();
+loadRecentSales();
+setInterval(loadRecentSales, 30000);
+</script>
+</body>
+</html>
