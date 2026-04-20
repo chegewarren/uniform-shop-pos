@@ -370,7 +370,11 @@ body {
           <span class="si-label">Quantity</span>
           <div class="qty-ctrl">
             <button class="qty-btn" onclick="changeQty(-1)">−</button>
-            <span class="qty-val" id="qtyVal">1</span>
+            <input type="number" id="qtyVal" value="1" min="1"
+              style="width:60px;text-align:center;background:var(--bg);border:1px solid var(--border);
+              border-radius:8px;color:var(--text);font-family:var(--mono);font-size:16px;
+              font-weight:600;padding:4px 6px;"
+              oninput="manualQty(this.value)"/>
             <button class="qty-btn" onclick="changeQty(1)">+</button>
           </div>
         </div>
@@ -505,13 +509,26 @@ function selectProduct(p) {
 }
 
 function changeQty(d) {
-  const maxStock = parseInt(selectedProduct.stock) || 0;
+  const maxStock = parseInt(selectedProduct?.stock) || 0;
   qty = Math.max(1, Math.min(qty + d, maxStock));
-  document.getElementById('qtyVal').textContent = qty;
+  document.getElementById('qtyVal').value = qty;
   updateTotal();
   if (qty >= maxStock) {
-    showToast(`⚠️ Maximum stock reached (${maxStock} available)`, 'error');
+    showToast(`⚠️ Maximum stock: ${maxStock}`, 'error');
   }
+}
+
+function manualQty(val) {
+  const maxStock = parseInt(selectedProduct?.stock) || 0;
+  let v = parseInt(val) || 1;
+  if (v < 1) v = 1;
+  if (v > maxStock) {
+    v = maxStock;
+    document.getElementById('qtyVal').value = v;
+    showToast(`⚠️ Only ${maxStock} in stock!`, 'error');
+  }
+  qty = v;
+  updateTotal();
 }
 
 function updateTotal() {
@@ -526,10 +543,6 @@ async function initiatePayment() {
   const customer = document.getElementById('customerName').value.trim() || 'Walk-in';
   if (!phone) { showToast('Please enter a phone number', 'error'); return; }
   if (!selectedProduct) { showToast('Please select a product', 'error'); return; }
-  if (qty > parseInt(selectedProduct.stock)) { 
-    showToast(`❌ Not enough stock! Only ${selectedProduct.stock} available.`, 'error'); 
-    return; 
-  }
 
   document.getElementById('payBtn').disabled = true;
   showModal('waiting', phone, selectedProduct.price * qty);
