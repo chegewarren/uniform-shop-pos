@@ -9,7 +9,7 @@ app = Flask(__name__)
 SHEET_ID     = os.getenv("SHEET_ID", "13OzCQ27gqNRvzdX0xP1seb8kJdHoevu61gaw9GMysc4")
 API_KEY      = os.getenv("GOOGLE_API_KEY")
 SHEETS_BASE  = "https://sheets.googleapis.com/v4/spreadsheets"
-APPS_SCRIPT  = os.getenv("APPS_SCRIPT_URL", "https://script.google.com/macros/s/AKfycbwN9bkobYvGo1NcB22pfUd_N4su9HkJxCZ7MwXbGEpzCrc9-G22rSF6LMlNDUML6PrxAg/exec")
+APPS_SCRIPT  = os.getenv("APPS_SCRIPT_URL", "https://script.google.com/macros/s/AKfycbymBs07cFuLPeH8pnv5j6lOjGUnyqkhs4Vlf5AW0ILwbkdSQr9IPvI4RKOCg1josNNhaw/exec")
 
 # ── Read from Google Sheets (API key) ────────────────────────────
 def sheets_get(range_):
@@ -33,7 +33,7 @@ CONSUMER_SECRET = os.getenv("MPESA_CONSUMER_SECRET")
 SHORTCODE       = os.getenv("MPESA_SHORTCODE", "174379")
 PASSKEY         = os.getenv("MPESA_PASSKEY", "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919")
 CALLBACK_URL    = os.getenv("CALLBACK_URL", "https://uniform-shop-pos-1.onrender.com/mpesa/callback")
-APPS_SCRIPT_CALLBACK = os.getenv("APPS_SCRIPT_URL", "https://script.google.com/macros/s/AKfycbwN9bkobYvGo1NcB22pfUd_N4su9HkJxCZ7MwXbGEpzCrc9-G22rSF6LMlNDUML6PrxAg/exec")
+APPS_SCRIPT_CALLBACK = os.getenv("APPS_SCRIPT_URL", "https://script.google.com/macros/s/AKfycbymBs07cFuLPeH8pnv5j6lOjGUnyqkhs4Vlf5AW0ILwbkdSQr9IPvI4RKOCg1josNNhaw/exec")
 MPESA_ENV       = os.getenv("MPESA_ENV", "sandbox")
 BASE_URL = ("https://sandbox.safaricom.co.ke" if MPESA_ENV == "sandbox"
             else "https://api.safaricom.co.ke")
