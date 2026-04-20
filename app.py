@@ -171,6 +171,49 @@ def test_sale():
     })
     return jsonify(result)
 
+@app.route("/api/cash", methods=["POST"])
+def cash_payment():
+    """Record a cash sale directly without M-Pesa."""
+    data     = request.json
+    product  = data["product"]
+    qty      = int(data.get("qty", 1))
+    amount   = int(data.get("amount", int(product["price"]) * qty))
+    customer = data.get("customer", "Walk-in")
+
+    # Stock check
+    if qty > int(product.get("stock", 0)):
+        return jsonify({"ok": False,
+            "error": f"Not enough stock! Only {product.get('stock', 0)} available."}), 400
+    try:
+        data_rows = sheets_get("Sales Records!A3:A500")
+        rows      = data_rows.get("values", [])
+        next_num  = len([r for r in rows if r and r[0] and r[0] != "TOTALS"]) + 1
+        txn_id    = f"TXN-{next_num:04d}"
+
+        sale_result = script_post({
+            "action":     "add_sale",
+            "txn_id":     txn_id,
+            "date":       datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+            "customer":   customer,
+            "item":       product["name"],
+            "category":   product["category"],
+            "qty":        qty,
+            "price":      product["price"],
+            "amount":     amount,
+            "mpesa_code": "CASH"
+        })
+
+        stock_result = script_post({
+            "action": "deduct_stock",
+            "item":   product["name"],
+            "qty":    qty
+        })
+
+        print(f"[CASH] {txn_id} — {product['name']} x{qty} = KES {amount}")
+        return jsonify({"ok": True, "txn_id": txn_id})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
+
 @app.route("/api/status/<ckid>")
 def check_status(ckid):
     return jsonify({"status": "pending" if ckid in pending else "completed"})
