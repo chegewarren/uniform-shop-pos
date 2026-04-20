@@ -20,11 +20,16 @@ def sheets_append(range_, values):
     r = requests.post(url, json={"values": values}, timeout=10)
     return r.json()
 
+def sheets_update(range_, values):
+    url = f"{SHEETS_BASE}/{SHEET_ID}/values/{range_}?valueInputOption=USER_ENTERED&key={API_KEY}"
+    r = requests.put(url, json={"values": values}, timeout=10)
+    return r.json()
+
 CONSUMER_KEY    = os.getenv("MPESA_CONSUMER_KEY")
 CONSUMER_SECRET = os.getenv("MPESA_CONSUMER_SECRET")
 SHORTCODE       = os.getenv("MPESA_SHORTCODE", "174379")
 PASSKEY         = os.getenv("MPESA_PASSKEY", "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919")
-CALLBACK_URL    = os.getenv("CALLBACK_URL")
+CALLBACK_URL    = os.getenv("CALLBACK_URL", "https://uniform-shop-pos-1.onrender.com/mpesa/callback")
 MPESA_ENV       = os.getenv("MPESA_ENV", "sandbox")
 BASE_URL = ("https://sandbox.safaricom.co.ke" if MPESA_ENV == "sandbox"
             else "https://api.safaricom.co.ke")
@@ -59,6 +64,7 @@ def stk_push(phone, amount, account_ref, description):
         json=payload, headers={"Authorization": f"Bearer {token}"}, timeout=15
     )
     return r.json()
+
 pending = {}
 
 @app.route("/")
@@ -68,27 +74,21 @@ def index():
 @app.route("/api/products")
 def get_products():
     try:
-        data = sheets_get("Inventory!A3:J200")
+        data = sheets_get("Inventory!A3:H200")
         rows = data.get("values", [])
         products = []
         for i, row in enumerate(rows, start=3):
-            while len(row) < 10:
+            while len(row) < 8:
                 row.append("")
             name = row[1].strip()
             if not name:
                 continue
-            try:
-                stock = int(str(row[5]).replace(",","")) if row[5] else 0
-            except:
-                stock = 0
-            try:
-                price = int(str(row[4]).replace(",","")) if row[4] else 0
-            except:
-                price = 0
-            try:
-                reorder = int(str(row[6]).replace(",","")) if row[6] else 0
-            except:
-                reorder = 0
+            try: stock = int(str(row[5]).replace(",","").replace(" ","")) if row[5] else 0
+            except: stock = 0
+            try: price = int(str(row[4]).replace(",","").replace(" ","")) if row[4] else 0
+            except: price = 0
+            try: reorder = int(str(row[6]).replace(",","").replace(" ","")) if row[6] else 0
+            except: reorder = 0
             products.append({
                 "row": i, "id": row[0], "name": name,
                 "category": row[2], "price": price,
@@ -110,6 +110,13 @@ def pay():
     qty      = int(data.get("qty", 1))
     amount   = int(product["price"]) * qty
     customer = data.get("customer_name", "Walk-in")
+
+    # Stock check
+    current_stock = int(product.get("stock", 0))
+    if qty > current_stock:
+        return jsonify({"ok": False,
+            "error": f"Not enough stock! Only {current_stock} available."}), 400
+
     try:
         resp = stk_push(phone=phone, amount=amount,
                         account_ref=product["name"][:12],
@@ -151,7 +158,7 @@ def check_status(ckid):
 @app.route("/api/sales")
 def get_sales():
     try:
-        data = sheets_get("Sales Records!A3:L200")
+        data = sheets_get("Sales Records!A3:L500")
         rows = data.get("values", [])
         headers = ["Transaction ID","Date","Customer Name","Customer Type",
                    "Item","Category","Size","Qty","Unit Price (KES)",
@@ -160,7 +167,7 @@ def get_sales():
         for row in rows:
             while len(row) < 12:
                 row.append("")
-            if row[0]:
+            if row[0] and row[0] != "TOTALS":
                 sales.append(dict(zip(headers, row)))
         return jsonify({"ok": True, "sales": sales[-50:]})
     except Exception as e:
@@ -168,30 +175,44 @@ def get_sales():
 
 def _record_sale(sale, mpesa_code):
     try:
+        # 1. Get next transaction number
         data     = sheets_get("Sales Records!A3:A500")
         rows     = data.get("values", [])
-        next_num = len([r for r in rows if r and r[0]]) + 1
+        next_num = len([r for r in rows if r and r[0] and r[0] != "TOTALS"]) + 1
         txn_id   = f"TXN-{next_num:04d}"
         p        = sale["product"]
+
+        # 2. Append to Sales Records
         sheets_append("Sales Records!A:L", [[
-            txn_id, sale["timestamp"], sale["customer"],
-            "M-Pesa Customer", p["name"], p["category"],
-            "", sale["qty"], p["price"], 0,
-            sale["amount"], f"MPesa: {mpesa_code}"
+            txn_id,
+            sale["timestamp"],
+            sale["customer"],
+            "M-Pesa Customer",
+            p["name"],
+            p["category"],
+            "",
+            sale["qty"],
+            p["price"],
+            0,
+            sale["amount"],
+            f"MPesa: {mpesa_code}"
         ]])
-        print(f"[SALE] {txn_id} — {p['name']} x{sale['qty']} = KES {sale['amount']} | {mpesa_code}")
-    except Exception as e:
-        # Deduct stock from Inventory
+
+        # 3. Deduct stock from Inventory
         inv_data = sheets_get("Inventory!A3:F200")
         inv_rows = inv_data.get("values", [])
         for idx, inv_row in enumerate(inv_rows, start=3):
             while len(inv_row) < 6:
                 inv_row.append("")
             if inv_row[1].strip().lower() == p["name"].strip().lower():
-                current = int(str(inv_row[5]).replace(",","")) if inv_row[5] else 0
+                current = int(str(inv_row[5]).replace(",","").replace(" ","")) if inv_row[5] else 0
                 new_stock = max(0, current - sale["qty"])
                 sheets_update(f"Inventory!F{idx}", [[new_stock]])
+                print(f"[STOCK] {p['name']} stock: {current} → {new_stock}")
                 break
+
+        print(f"[SALE] {txn_id} — {p['name']} x{sale['qty']} = KES {sale['amount']} | {mpesa_code}")
+    except Exception as e:
         print(f"[ERROR] {e}")
 
 if __name__ == "__main__":
