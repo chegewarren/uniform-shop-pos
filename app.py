@@ -6,25 +6,28 @@ from dotenv import load_dotenv
 load_dotenv()
 app = Flask(__name__)
 
-SHEET_ID    = os.getenv("SHEET_ID", "13OzCQ27gqNRvzdX0xP1seb8kJdHoevu61gaw9GMysc4")
-API_KEY     = os.getenv("GOOGLE_API_KEY")
-SHEETS_BASE = "https://sheets.googleapis.com/v4/spreadsheets"
+SHEET_ID     = os.getenv("SHEET_ID", "13OzCQ27gqNRvzdX0xP1seb8kJdHoevu61gaw9GMysc4")
+API_KEY      = os.getenv("GOOGLE_API_KEY")
+SHEETS_BASE  = "https://sheets.googleapis.com/v4/spreadsheets"
+APPS_SCRIPT  = os.getenv("APPS_SCRIPT_URL", "https://script.google.com/macros/s/AKfycbwN9bkobYvGo1NcB22pfUd_N4su9HkJxCZ7MwXbGEpzCrc9-G22rSF6LMlNDUML6PrxAg/exec")
 
+# ── Read from Google Sheets (API key) ────────────────────────────
 def sheets_get(range_):
     url = f"{SHEETS_BASE}/{SHEET_ID}/values/{range_}?key={API_KEY}"
     r = requests.get(url, timeout=10)
     return r.json()
 
-def sheets_append(range_, values):
-    url = f"{SHEETS_BASE}/{SHEET_ID}/values/{range_}:append?valueInputOption=USER_ENTERED&key={API_KEY}"
-    r = requests.post(url, json={"values": values}, timeout=10)
-    return r.json()
+# ── Write via Apps Script ─────────────────────────────────────────
+def script_post(data):
+    try:
+        r = requests.post(APPS_SCRIPT, json=data, timeout=15,
+                          allow_redirects=True)
+        return r.json()
+    except Exception as e:
+        print(f"[SCRIPT ERROR] {e}")
+        return {"ok": False, "error": str(e)}
 
-def sheets_update(range_, values):
-    url = f"{SHEETS_BASE}/{SHEET_ID}/values/{range_}?valueInputOption=USER_ENTERED&key={API_KEY}"
-    r = requests.put(url, json={"values": values}, timeout=10)
-    return r.json()
-
+# ── M-Pesa ────────────────────────────────────────────────────────
 CONSUMER_KEY    = os.getenv("MPESA_CONSUMER_KEY")
 CONSUMER_SECRET = os.getenv("MPESA_CONSUMER_SECRET")
 SHORTCODE       = os.getenv("MPESA_SHORTCODE", "174379")
@@ -45,7 +48,6 @@ def stk_push(phone, amount, account_ref, description):
     token     = mpesa_token()
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     password  = base64.b64encode(f"{SHORTCODE}{PASSKEY}{timestamp}".encode()).decode()
-    callback  = CALLBACK_URL or "https://uniform-shop-pos-1.onrender.com/mpesa/callback"
     payload = {
         "BusinessShortCode": SHORTCODE,
         "Password":          password,
@@ -55,7 +57,7 @@ def stk_push(phone, amount, account_ref, description):
         "PartyA":            phone,
         "PartyB":            SHORTCODE,
         "PhoneNumber":       phone,
-        "CallBackURL":       callback,
+        "CallBackURL":       CALLBACK_URL,
         "AccountReference":  account_ref,
         "TransactionDesc":   description
     }
@@ -112,10 +114,9 @@ def pay():
     customer = data.get("customer_name", "Walk-in")
 
     # Stock check
-    current_stock = int(product.get("stock", 0))
-    if qty > current_stock:
+    if qty > int(product.get("stock", 0)):
         return jsonify({"ok": False,
-            "error": f"Not enough stock! Only {current_stock} available."}), 400
+            "error": f"Not enough stock! Only {product.get('stock', 0)} available."}), 400
 
     try:
         resp = stk_push(phone=phone, amount=amount,
@@ -182,36 +183,29 @@ def _record_sale(sale, mpesa_code):
         txn_id   = f"TXN-{next_num:04d}"
         p        = sale["product"]
 
-        # 2. Append to Sales Records
-        sheets_append("Sales Records!A:L", [[
-            txn_id,
-            sale["timestamp"],
-            sale["customer"],
-            "M-Pesa Customer",
-            p["name"],
-            p["category"],
-            "",
-            sale["qty"],
-            p["price"],
-            0,
-            sale["amount"],
-            f"MPesa: {mpesa_code}"
-        ]])
+        # 2. Write sale via Apps Script
+        sale_result = script_post({
+            "action":     "add_sale",
+            "txn_id":     txn_id,
+            "date":       sale["timestamp"],
+            "customer":   sale["customer"],
+            "item":       p["name"],
+            "category":   p["category"],
+            "qty":        sale["qty"],
+            "price":      p["price"],
+            "amount":     sale["amount"],
+            "mpesa_code": mpesa_code
+        })
+        print(f"[SALE] {txn_id} result: {sale_result}")
 
-        # 3. Deduct stock from Inventory
-        inv_data = sheets_get("Inventory!A3:F200")
-        inv_rows = inv_data.get("values", [])
-        for idx, inv_row in enumerate(inv_rows, start=3):
-            while len(inv_row) < 6:
-                inv_row.append("")
-            if inv_row[1].strip().lower() == p["name"].strip().lower():
-                current = int(str(inv_row[5]).replace(",","").replace(" ","")) if inv_row[5] else 0
-                new_stock = max(0, current - sale["qty"])
-                sheets_update(f"Inventory!F{idx}", [[new_stock]])
-                print(f"[STOCK] {p['name']} stock: {current} → {new_stock}")
-                break
+        # 3. Deduct stock via Apps Script
+        stock_result = script_post({
+            "action": "deduct_stock",
+            "item":   p["name"],
+            "qty":    sale["qty"]
+        })
+        print(f"[STOCK] {p['name']} deduct result: {stock_result}")
 
-        print(f"[SALE] {txn_id} — {p['name']} x{sale['qty']} = KES {sale['amount']} | {mpesa_code}")
     except Exception as e:
         print(f"[ERROR] {e}")
 
