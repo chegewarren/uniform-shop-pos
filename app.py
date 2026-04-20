@@ -33,6 +33,7 @@ CONSUMER_SECRET = os.getenv("MPESA_CONSUMER_SECRET")
 SHORTCODE       = os.getenv("MPESA_SHORTCODE", "174379")
 PASSKEY         = os.getenv("MPESA_PASSKEY", "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919")
 CALLBACK_URL    = os.getenv("CALLBACK_URL", "https://uniform-shop-pos-1.onrender.com/mpesa/callback")
+APPS_SCRIPT_CALLBACK = os.getenv("APPS_SCRIPT_URL", "https://script.google.com/macros/s/AKfycbwN9bkobYvGo1NcB22pfUd_N4su9HkJxCZ7MwXbGEpzCrc9-G22rSF6LMlNDUML6PrxAg/exec")
 MPESA_ENV       = os.getenv("MPESA_ENV", "sandbox")
 BASE_URL = ("https://sandbox.safaricom.co.ke" if MPESA_ENV == "sandbox"
             else "https://api.safaricom.co.ke")
@@ -151,6 +152,24 @@ def mpesa_callback():
     elif ckid in pending:
         pending.pop(ckid)
     return jsonify({"ResultCode": 0, "ResultDesc": "Accepted"})
+
+@app.route("/api/test_sale", methods=["POST"])
+def test_sale():
+    """Manual test endpoint to verify Apps Script writing works."""
+    data = request.json or {}
+    result = script_post({
+        "action":     "add_sale",
+        "txn_id":     "TEST-001",
+        "date":       datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+        "customer":   data.get("customer", "Test Customer"),
+        "item":       data.get("item", "White Shirt"),
+        "category":   "Tops",
+        "qty":        1,
+        "price":      450,
+        "amount":     450,
+        "mpesa_code": "TESTCODE123"
+    })
+    return jsonify(result)
 
 @app.route("/api/status/<ckid>")
 def check_status(ckid):
