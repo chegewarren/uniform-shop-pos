@@ -3,139 +3,168 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Uniform Shop — Point of Sale</title>
+<title>Uniform Shop — POS</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-:root{--navy:#0f1e3d;--navy2:#162850;--gold:#f0a500;--gold2:#ffc93c;--green:#00c48c;--red:#ff4d6d;--bg:#080f20;--card:#111d38;--card2:#162040;--border:#1e2f52;--text:#e8edf8;--muted:#6b7fa8;--white:#ffffff;--font:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;}
+:root{--navy:#0f1e3d;--gold:#f0a500;--gold2:#ffc93c;--green:#00c48c;--red:#ff4d6d;--bg:#080f20;--card:#111d38;--card2:#162040;--border:#1e2f52;--text:#e8edf8;--muted:#6b7fa8;--font:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
-.topbar{background:var(--navy);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar{background:var(--navy);border-bottom:1px solid var(--border);padding:0 18px;height:54px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
 .topbar-brand{display:flex;align-items:center;gap:10px;}
-.topbar-logo{width:34px;height:34px;background:var(--gold);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:17px;}
-.topbar-name{font-size:15px;font-weight:700;}
+.topbar-logo{width:32px;height:32px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.topbar-name{font-size:14px;font-weight:700;}
 .topbar-sub{font-size:10px;color:var(--muted);}
-.topbar-right{display:flex;align-items:center;gap:10px;}
-.topbar-time{font-family:var(--mono);font-size:13px;color:var(--gold);}
-.dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
-.status-txt{font-size:11px;color:var(--muted);}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.topbar-time{font-family:var(--mono);font-size:12px;color:var(--gold);}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.nav-tabs{display:flex;gap:4px;background:var(--bg);padding:10px 20px 0;border-bottom:1px solid var(--border);}
-.nav-tab{padding:8px 20px;border-radius:10px 10px 0 0;border:1px solid transparent;background:none;color:var(--muted);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;}
+.user-info{font-size:11px;color:var(--muted);padding:0 10px;border-left:1px solid var(--border);line-height:1.5;}
+.topbar-btn{padding:5px 11px;background:none;border:1px solid var(--border);border-radius:7px;color:var(--muted);font-family:var(--font);font-size:11px;cursor:pointer;transition:all .2s;}
+.topbar-btn:hover{border-color:var(--gold);color:var(--gold);}
+.topbar-btn.danger:hover{border-color:var(--red);color:var(--red);}
+.nav-tabs{display:flex;gap:3px;background:var(--bg);padding:8px 18px 0;border-bottom:1px solid var(--border);}
+.nav-tab{padding:7px 18px;border-radius:9px 9px 0 0;border:1px solid transparent;background:none;color:var(--muted);font-family:var(--font);font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;}
 .nav-tab.active{background:var(--card);border-color:var(--border);border-bottom-color:var(--card);color:var(--text);}
 .nav-tab:hover:not(.active){color:var(--text);}
 .page{display:none;}
 .page.active{display:block;}
-.pos-layout{display:grid;grid-template-columns:1fr 370px;height:calc(100vh - 100px);}
-.products-panel{padding:18px;overflow-y:auto;border-right:1px solid var(--border);}
-.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
-.panel-title{font-size:17px;font-weight:700;}
-.panel-actions{display:flex;gap:8px;align-items:center;}
-.search-box{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 14px;width:200px;}
-.search-box input{background:none;border:none;outline:none;color:var(--text);font-family:var(--font);font-size:13px;width:100%;}
-.refresh-btn{padding:8px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--gold);font-family:var(--font);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;}
+
+/* POS */
+.pos-layout{display:grid;grid-template-columns:1fr 360px;height:calc(100vh - 98px);}
+.products-panel{padding:16px;overflow-y:auto;border-right:1px solid var(--border);}
+.panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+.panel-title{font-size:16px;font-weight:700;}
+.panel-actions{display:flex;gap:7px;align-items:center;}
+.search-box{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--border);border-radius:9px;padding:7px 12px;width:190px;}
+.search-box input{background:none;border:none;outline:none;color:var(--text);font-family:var(--font);font-size:12px;width:100%;}
+.refresh-btn{padding:7px 12px;background:var(--card);border:1px solid var(--border);border-radius:9px;color:var(--gold);font-family:var(--font);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .2s;}
 .refresh-btn:hover{border-color:var(--gold);}
-.spinning .refresh-icon{display:inline-block;animation:spin 1s linear infinite;}
+.spinning .ri{display:inline-block;animation:spin 1s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
-.cats{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
-.cat-btn{padding:5px 14px;border-radius:18px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:var(--font);font-size:11px;font-weight:500;cursor:pointer;transition:all .2s;}
+.cats{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px;}
+.cat-btn{padding:4px 12px;border-radius:16px;border:1px solid var(--border);background:var(--card);color:var(--muted);font-family:var(--font);font-size:11px;cursor:pointer;transition:all .2s;}
 .cat-btn.active,.cat-btn:hover{background:var(--gold);color:var(--navy);border-color:var(--gold);}
-.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:12px;}
-.product-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
-.product-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 8px 20px rgba(240,165,0,.15);}
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+.product-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:14px 12px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.product-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 6px 18px rgba(240,165,0,.15);}
 .product-card.selected{border-color:var(--gold);background:#1a2a10;}
 .product-card.out-of-stock{opacity:.4;pointer-events:none;}
-.product-emoji{font-size:26px;margin-bottom:8px;}
-.product-name{font-size:12px;font-weight:600;margin-bottom:3px;line-height:1.3;}
-.product-cat{font-size:10px;color:var(--muted);margin-bottom:8px;}
-.product-price{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--gold);}
-.product-stock{position:absolute;top:10px;right:10px;font-size:10px;font-family:var(--mono);background:var(--bg);border-radius:5px;padding:2px 6px;color:var(--muted);}
+.product-emoji{font-size:24px;margin-bottom:7px;}
+.product-name{font-size:11px;font-weight:600;margin-bottom:2px;line-height:1.3;}
+.product-cat{font-size:10px;color:var(--muted);margin-bottom:7px;}
+.product-price{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--gold);}
+.product-stock{position:absolute;top:8px;right:8px;font-size:9px;font-family:var(--mono);background:var(--bg);border-radius:4px;padding:2px 5px;color:var(--muted);}
 .product-stock.low{color:var(--red);}
 .checkout-panel{background:var(--card);display:flex;flex-direction:column;overflow:hidden;}
-.checkout-header{padding:16px 20px 14px;border-bottom:1px solid var(--border);font-size:15px;font-weight:700;}
-.checkout-body{flex:1;overflow-y:auto;padding:16px 20px;}
-.no-selection{text-align:center;padding:40px 20px;color:var(--muted);}
-.no-selection .icon{font-size:44px;margin-bottom:10px;}
-.selected-item{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px;display:none;}
+.checkout-header{padding:14px 18px 12px;border-bottom:1px solid var(--border);font-size:14px;font-weight:700;}
+.checkout-body{flex:1;overflow-y:auto;padding:14px 18px;}
+.no-selection{text-align:center;padding:36px 16px;color:var(--muted);}
+.no-selection .icon{font-size:40px;margin-bottom:8px;}
+.selected-item{background:var(--card2);border:1px solid var(--border);border-radius:11px;padding:13px;margin-bottom:14px;display:none;}
 .selected-item.visible{display:block;}
-.si-name{font-weight:600;font-size:14px;margin-bottom:3px;}
-.si-cat{font-size:11px;color:var(--muted);margin-bottom:10px;}
-.si-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.si-label{font-size:12px;color:var(--muted);}
-.qty-ctrl{display:flex;align-items:center;gap:8px;}
-.qty-btn{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.si-name{font-weight:600;font-size:13px;margin-bottom:2px;}
+.si-cat{font-size:10px;color:var(--muted);margin-bottom:9px;}
+.si-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
+.si-label{font-size:11px;color:var(--muted);}
+.qty-ctrl{display:flex;align-items:center;gap:7px;}
+.qty-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
 .qty-btn:hover{background:var(--gold);color:var(--navy);border-color:var(--gold);}
-.qty-input{width:56px;text-align:center;background:var(--bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:var(--mono);font-size:15px;font-weight:600;padding:3px 5px;outline:none;}
-.si-price{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--gold);}
-.form-group{margin-bottom:14px;}
-.form-label{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:5px;display:block;}
-.form-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 13px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color .2s;}
+.qty-input{width:52px;text-align:center;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:14px;font-weight:600;padding:2px 4px;outline:none;}
+.si-price{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--gold);}
+.form-group{margin-bottom:12px;}
+.form-label{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:4px;display:block;}
+.form-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:var(--font);font-size:12px;outline:none;transition:border-color .2s;}
 .form-input:focus{border-color:var(--gold);}
 .form-input::placeholder{color:var(--muted);}
-.payment-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;}
-.pay-btn{padding:13px;border:none;border-radius:12px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.payment-btns{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:3px;}
+.pay-btn{padding:12px;border:none;border-radius:11px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:6px;}
 .pay-btn.mpesa{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);}
 .pay-btn.cash{background:linear-gradient(135deg,var(--green),#00a876);color:var(--navy);}
-.pay-btn:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(0,0,0,.3);}
+.pay-btn:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(0,0,0,.3);}
 .pay-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
-.recent-sales{border-top:1px solid var(--border);padding:14px 20px;max-height:180px;overflow-y:auto;}
-.rs-title{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
-.rs-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.recent-sales{border-top:1px solid var(--border);padding:12px 18px;max-height:170px;overflow-y:auto;}
+.rs-title{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;}
+.rs-item{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:11px;}
 .rs-item:last-child{border-bottom:none;}
 .rs-name{font-weight:500;}
 .rs-meta{color:var(--muted);font-size:10px;}
 .rs-amount{font-family:var(--mono);font-weight:600;}
 .rs-amount.mpesa{color:var(--gold);}
 .rs-amount.cash{color:var(--green);}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center;}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center;}
 .modal-overlay.show{display:flex;}
-.modal{background:var(--card);border:1px solid var(--border);border-radius:22px;padding:32px;width:400px;max-width:95vw;text-align:center;animation:slideUp .3s ease;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;width:390px;max-width:95vw;text-align:center;animation:slideUp .3s ease;}
 @keyframes slideUp{from{transform:translateY(30px);opacity:0}to{transform:translateY(0);opacity:1}}
-.modal-title{font-size:20px;font-weight:700;margin-bottom:6px;}
-.modal-sub{font-size:13px;color:var(--muted);margin-bottom:22px;line-height:1.6;}
-.modal-phone{font-family:var(--mono);font-size:18px;color:var(--gold);background:var(--bg);border-radius:10px;padding:10px 18px;margin-bottom:6px;letter-spacing:2px;}
-.modal-amount{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--green);margin-bottom:22px;}
-.spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 18px;}
-.success-check{width:66px;height:66px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 18px;animation:popIn .4s cubic-bezier(.34,1.56,.64,1);}
+.modal-title{font-size:19px;font-weight:700;margin-bottom:5px;}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:20px;line-height:1.6;}
+.modal-phone{font-family:var(--mono);font-size:17px;color:var(--gold);background:var(--bg);border-radius:9px;padding:9px 16px;margin-bottom:5px;letter-spacing:2px;}
+.modal-amount{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--green);margin-bottom:20px;}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 16px;}
+.success-check{width:62px;height:62px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px;animation:popIn .4s cubic-bezier(.34,1.56,.64,1);}
 @keyframes popIn{from{transform:scale(0)}to{transform:scale(1)}}
-.fail-x{width:66px;height:66px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 18px;}
-.btn-outline{padding:11px 24px;border-radius:11px;border:1px solid var(--border);background:none;color:var(--text);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;margin:4px;}
+.fail-x{width:62px;height:62px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 16px;}
+.btn-outline{padding:10px 22px;border-radius:10px;border:1px solid var(--border);background:none;color:var(--text);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .2s;margin:3px;}
 .btn-outline:hover{border-color:var(--gold);color:var(--gold);}
-.btn-primary{padding:11px 28px;border-radius:11px;border:none;background:var(--gold);color:var(--navy);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;margin:4px;}
+.btn-primary{padding:10px 26px;border-radius:10px;border:none;background:var(--gold);color:var(--navy);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;margin:3px;}
 .btn-primary:hover{background:var(--gold2);}
-.btn-green{padding:11px 24px;border-radius:11px;border:none;background:var(--green);color:var(--navy);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;margin:4px;}
-.cash-amount-display{font-family:var(--mono);font-size:32px;font-weight:700;color:var(--green);margin-bottom:6px;}
-.cash-note{font-size:12px;color:var(--muted);margin-bottom:6px;}
-.dashboard-page{padding:20px;overflow-y:auto;height:calc(100vh - 100px);}
-.dash-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
-.dash-title{font-size:20px;font-weight:700;}
-.dash-refresh{padding:8px 18px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--gold);font-family:var(--font);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .2s;}
+.btn-green{padding:10px 22px;border-radius:10px;border:none;background:var(--green);color:var(--navy);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;margin:3px;}
+.cash-amount-display{font-family:var(--mono);font-size:30px;font-weight:700;color:var(--green);margin-bottom:5px;}
+.cash-note{font-size:11px;color:var(--muted);margin-bottom:5px;}
+
+/* Dashboard */
+.dashboard-page{padding:18px;overflow-y:auto;height:calc(100vh - 98px);}
+.dash-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.dash-title{font-size:19px;font-weight:700;}
+.dash-refresh{padding:7px 16px;background:var(--card);border:1px solid var(--border);border-radius:9px;color:var(--gold);font-family:var(--font);font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .2s;}
 .dash-refresh:hover{border-color:var(--gold);}
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
-.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;}
-.kpi-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
-.kpi-value{font-family:var(--mono);font-size:20px;font-weight:700;}
-.kpi-sub{font-size:11px;color:var(--muted);margin-top:4px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px;}
+.kpi-label{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px;}
+.kpi-value{font-family:var(--mono);font-size:18px;font-weight:700;}
+.kpi-sub{font-size:10px;color:var(--muted);margin-top:3px;}
 .kpi-card.green .kpi-value{color:var(--green);}
 .kpi-card.gold .kpi-value{color:var(--gold);}
 .kpi-card.red .kpi-value{color:var(--red);}
 .kpi-card.blue .kpi-value{color:#4fc3f7;}
-.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px;}
-.chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;}
-.chart-title{font-size:13px;font-weight:600;margin-bottom:14px;color:var(--muted);}
-.chart-wrap{position:relative;height:220px;}
-.top-items{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:22px;}
-.top-item-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);}
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px;}
+.chart-title{font-size:12px;font-weight:600;margin-bottom:12px;color:var(--muted);}
+.chart-wrap{position:relative;height:200px;}
+.top-items{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px;margin-bottom:18px;}
+.top-item-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border);}
 .top-item-row:last-child{border-bottom:none;}
-.top-item-name{font-size:13px;font-weight:500;min-width:140px;}
-.top-item-bar-wrap{flex:1;margin:0 14px;background:var(--border);border-radius:4px;height:6px;}
-.top-item-bar{height:6px;border-radius:4px;background:var(--gold);}
-.top-item-val{font-family:var(--mono);font-size:12px;color:var(--gold);}
-.low-stock-section{background:var(--card);border:1px solid var(--red);border-radius:14px;padding:18px;margin-bottom:22px;}
-.low-stock-title{font-size:13px;font-weight:600;color:var(--red);margin-bottom:12px;}
-.low-stock-item{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.top-item-name{font-size:12px;font-weight:500;min-width:130px;}
+.top-item-bar-wrap{flex:1;margin:0 12px;background:var(--border);border-radius:3px;height:5px;}
+.top-item-bar{height:5px;border-radius:3px;background:var(--gold);}
+.top-item-val{font-family:var(--mono);font-size:11px;color:var(--gold);}
+.low-stock-section{background:var(--card);border:1px solid var(--red);border-radius:13px;padding:16px;margin-bottom:18px;}
+.low-stock-title{font-size:12px;font-weight:600;color:var(--red);margin-bottom:10px;}
+.low-stock-item{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px;}
 .low-stock-item:last-child{border-bottom:none;}
-.toast{position:fixed;bottom:20px;right:20px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 18px;font-size:13px;box-shadow:0 8px 28px rgba(0,0,0,.4);transform:translateY(80px);opacity:0;transition:all .3s;z-index:300;max-width:300px;}
+
+/* Settings */
+.settings-page{padding:18px;overflow-y:auto;height:calc(100vh - 98px);}
+.settings-title{font-size:19px;font-weight:700;margin-bottom:18px;}
+.settings-section{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:20px;margin-bottom:16px;}
+.settings-section-title{font-size:13px;font-weight:700;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.settings-btn{padding:11px 20px;border:none;border-radius:10px;background:var(--gold);color:var(--navy);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;margin-top:6px;}
+.settings-btn:hover{background:var(--gold2);}
+.settings-btn.danger{background:var(--red);color:white;}
+.settings-note{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;}
+.save-msg{font-size:12px;color:var(--green);margin-top:8px;display:none;}
+
+/* Sheet setup banner */
+.setup-banner{background:rgba(240,165,0,.1);border:1px solid var(--gold);border-radius:13px;padding:20px;text-align:center;margin-bottom:18px;}
+.setup-banner h3{font-size:16px;color:var(--gold);margin-bottom:8px;}
+.setup-banner p{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;}
+.setup-banner-btn{padding:10px 22px;border:none;border-radius:10px;background:var(--gold);color:var(--navy);font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;}
+
+/* Toast */
+.toast{position:fixed;bottom:18px;right:18px;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:11px 16px;font-size:12px;box-shadow:0 8px 28px rgba(0,0,0,.4);transform:translateY(80px);opacity:0;transition:all .3s;z-index:300;max-width:280px;}
 .toast.show{transform:translateY(0);opacity:1;}
 .toast.success{border-color:var(--green);}
 .toast.error{border-color:var(--red);}
@@ -147,27 +176,35 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   <div class="topbar-brand">
     <div class="topbar-logo">🏫</div>
     <div>
-      <div class="topbar-name">School Uniforms POS</div>
-      <div class="topbar-sub">Point of Sale System</div>
+      <div class="topbar-name" id="topBusinessName">School Uniforms POS</div>
+      <div class="topbar-sub" id="topUserName">Loading…</div>
     </div>
   </div>
   <div class="topbar-right">
     <div class="dot"></div>
-    <span class="status-txt">Live</span>
+    <div class="user-info" id="userPayInfo"></div>
     <div class="topbar-time" id="clock">--:--:--</div>
-    <div id="userInfo" style="font-size:12px;color:var(--muted);padding:0 8px;border-left:1px solid var(--border);margin-left:6px;"></div>
-    <button onclick="doLogout()" style="padding:6px 14px;background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:var(--font);font-size:12px;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">Logout</button>
+    <button class="topbar-btn" onclick="switchTab('settings',document.querySelectorAll('.nav-tab')[2])">⚙️ Settings</button>
+    <button class="topbar-btn danger" onclick="doLogout()">Logout</button>
   </div>
 </div>
 
 <div class="nav-tabs">
   <button class="nav-tab active" onclick="switchTab('pos',this)">🛒 Point of Sale</button>
   <button class="nav-tab" onclick="switchTab('dashboard',this)">📊 Dashboard</button>
+  <button class="nav-tab" onclick="switchTab('settings',this)">⚙️ Settings</button>
 </div>
 
 <!-- POS Page -->
 <div class="page active" id="page-pos">
-  <div class="pos-layout">
+  <div id="noSheetBanner" style="display:none;padding:16px;">
+    <div class="setup-banner">
+      <h3>📊 Connect Your Google Sheet</h3>
+      <p>You haven't connected a Google Sheet yet. Go to Settings to add your Sheet ID and API Key so your products, sales and inventory can sync automatically.</p>
+      <button class="setup-banner-btn" onclick="switchTab('settings',document.querySelectorAll('.nav-tab')[2])">Go to Settings →</button>
+    </div>
+  </div>
+  <div class="pos-layout" id="posLayout">
     <div class="products-panel">
       <div class="panel-header">
         <div class="panel-title">Select Product</div>
@@ -177,7 +214,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
             <input type="text" id="searchInput" placeholder="Search…" oninput="filterProducts()"/>
           </div>
           <button class="refresh-btn" id="refreshBtn" onclick="refreshProducts()">
-            <span class="refresh-icon">🔄</span> Refresh
+            <span class="ri">🔄</span> Refresh
           </button>
         </div>
       </div>
@@ -219,15 +256,23 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
             <label class="form-label">M-Pesa Phone Number</label>
             <input class="form-input" id="phoneInput" type="tel" placeholder="e.g. 0712 345 678"/>
           </div>
+          <div class="form-group">
+            <label class="form-label">Receive Payment Via</label>
+            <select class="form-input" id="paymentDestination">
+              <option value="phone">📱 Personal M-Pesa Number</option>
+              <option value="till">🏪 Till Number</option>
+              <option value="paybill">🏦 Paybill</option>
+            </select>
+          </div>
           <div class="payment-btns">
             <button class="pay-btn mpesa" id="mpesaBtn" onclick="initiatePayment('mpesa')">📱 M-Pesa</button>
-            <button class="pay-btn cash"  id="cashBtn"  onclick="initiatePayment('cash')">💵 Cash</button>
+            <button class="pay-btn cash" id="cashBtn" onclick="initiatePayment('cash')">💵 Cash</button>
           </div>
         </div>
       </div>
       <div class="recent-sales">
         <div class="rs-title">Recent Sales</div>
-        <div id="recentList"><div style="color:var(--muted);font-size:12px">No sales yet</div></div>
+        <div id="recentList"><div style="color:var(--muted);font-size:11px">No sales yet</div></div>
       </div>
     </div>
   </div>
@@ -239,7 +284,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
     <div class="dash-top">
       <div class="dash-title">📊 Business Dashboard</div>
       <button class="dash-refresh" id="dashRefreshBtn" onclick="loadDashboard(true)">
-        <span class="refresh-icon">🔄</span> Refresh Data
+        <span class="ri">🔄</span> Refresh
       </button>
     </div>
     <div class="kpi-grid">
@@ -258,7 +303,78 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
     </div>
     <div class="top-items">
       <div class="chart-title">🏆 Top Selling Items by Revenue</div>
-      <div id="topItemsList"><div style="color:var(--muted);font-size:13px">Loading…</div></div>
+      <div id="topItemsList"><div style="color:var(--muted);font-size:12px">Loading…</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Page -->
+<div class="page" id="page-settings">
+  <div class="settings-page">
+    <div class="settings-title">⚙️ Settings</div>
+
+    <!-- Google Sheet -->
+    <div class="settings-section">
+      <div class="settings-section-title">📊 Google Sheet Connection</div>
+      <div class="settings-grid">
+        <div class="form-group">
+          <label class="form-label">Google Sheet ID</label>
+          <input class="form-input" id="settingSheetId" type="text" placeholder="Paste Sheet ID here"/>
+          <div class="settings-note">From your Sheet URL: /spreadsheets/d/<strong>THIS_PART</strong>/edit</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Google API Key</label>
+          <input class="form-input" id="settingApiKey" type="text" placeholder="AIzaSy…"/>
+          <div class="settings-note">From console.cloud.google.com → Credentials. Sheet must be shared as Editor.</div>
+        </div>
+      </div>
+      <button class="settings-btn" onclick="saveSheetSettings()">💾 Save & Connect Sheet</button>
+      <div class="save-msg" id="sheetSaveMsg">✅ Sheet connected successfully!</div>
+    </div>
+
+    <!-- M-Pesa -->
+    <div class="settings-section">
+      <div class="settings-section-title">💳 M-Pesa Payment Details</div>
+      <div class="settings-grid">
+        <div class="form-group">
+          <label class="form-label">Personal M-Pesa Number</label>
+          <input class="form-input" id="settingMpesaPhone" type="tel" placeholder="e.g. 0712 345 678"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Till Number (optional)</label>
+          <input class="form-input" id="settingTill" type="text" placeholder="e.g. 123456"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Paybill Number (optional)</label>
+          <input class="form-input" id="settingPaybill" type="text" placeholder="e.g. 123456"/>
+        </div>
+      </div>
+      <button class="settings-btn" onclick="saveMpesaSettings()">💾 Save M-Pesa Details</button>
+      <div class="save-msg" id="mpesaSaveMsg">✅ M-Pesa details saved!</div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="settings-section">
+      <div class="settings-section-title">🔐 Change Password</div>
+      <div class="settings-grid">
+        <div class="form-group">
+          <label class="form-label">Current Password</label>
+          <input class="form-input" id="oldPassword" type="password" placeholder="Current password"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">New Password</label>
+          <input class="form-input" id="newPassword" type="password" placeholder="Min 6 characters"/>
+        </div>
+      </div>
+      <button class="settings-btn" onclick="changePassword()">🔐 Change Password</button>
+      <div class="save-msg" id="pwdSaveMsg">✅ Password changed!</div>
+      <div class="save-msg" id="pwdErrorMsg" style="color:var(--red)"></div>
+    </div>
+
+    <!-- Account Info -->
+    <div class="settings-section">
+      <div class="settings-section-title">👤 Account Info</div>
+      <div id="accountInfo" style="font-size:13px;color:var(--muted);line-height:2"></div>
     </div>
   </div>
 </div>
@@ -271,6 +387,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 <script>
 let products=[], selectedProduct=null, qty=1;
 let pollInterval=null, catChartInst=null, payChartInst=null;
+let currentUser=null;
 
 function updateClock(){document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit',second:'2-digit'});}
 setInterval(updateClock,1000);updateClock();
@@ -278,16 +395,54 @@ setInterval(updateClock,1000);updateClock();
 function switchTab(tab,btn){
   document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  btn.classList.add('active');
+  if(btn) btn.classList.add('active');
   document.getElementById('page-'+tab).classList.add('active');
   if(tab==='dashboard') loadDashboard(false);
+  if(tab==='settings') loadSettingsPage();
 }
 
+async function loadUserInfo(){
+  try{
+    const r=await fetch('/api/me');
+    const d=await r.json();
+    if(!d.ok){window.location.href='/login';return;}
+    currentUser=d.user;
+    document.getElementById('topBusinessName').textContent=d.user.business_name||d.user.name;
+    document.getElementById('topUserName').textContent=d.user.name;
+    let payInfo='';
+    if(d.user.mpesa_phone) payInfo+=`📱 ${d.user.mpesa_phone}`;
+    if(d.user.till_number) payInfo+=(payInfo?' · ':'')+`🏪 Till: ${d.user.till_number}`;
+    if(d.user.paybill_number) payInfo+=(payInfo?' · ':'')+`🏦 Paybill: ${d.user.paybill_number}`;
+    document.getElementById('userPayInfo').innerHTML=`<span style="font-size:11px">${payInfo}</span>`;
+    // Check if sheet connected
+    if(!d.user.sheet_id){
+      document.getElementById('noSheetBanner').style.display='block';
+      document.getElementById('posLayout').style.display='none';
+    }
+  }catch{window.location.href='/login';}
+}
+
+async function doLogout(){
+  await fetch('/api/logout',{method:'POST'});
+  window.location.href='/login';
+}
+
+// ── Products ──
 async function loadProducts(){
   try{
     const r=await fetch('/api/products');
     const d=await r.json();
-    if(!d.ok) throw new Error(d.error);
+    if(!d.ok){
+      if(d.error==='NO_SHEET'){
+        document.getElementById('noSheetBanner').style.display='block';
+        document.getElementById('posLayout').style.display='none';
+      }else{
+        document.getElementById('productsGrid').innerHTML=`<div style="color:var(--red);padding:20px;grid-column:1/-1">Error: ${d.error}</div>`;
+      }
+      return;
+    }
+    document.getElementById('noSheetBanner').style.display='none';
+    document.getElementById('posLayout').style.display='grid';
     products=d.products;
     renderCategories();
     renderProducts(products);
@@ -387,38 +542,35 @@ async function initiatePayment(method){
   if(!selectedProduct){showToast('Select a product first','error');return;}
   if(qty>parseInt(selectedProduct.stock)){showToast(`Only ${selectedProduct.stock} in stock!`,'error');return;}
   const amount=parseInt(selectedProduct.price)*qty;
+  const destination=document.getElementById('paymentDestination').value;
 
   if(method==='mpesa'){
     const phone=document.getElementById('phoneInput').value.trim();
-    if(!phone){showToast('Enter M-Pesa phone number','error');return;}
+    if(!phone){showToast('Enter customer M-Pesa number','error');return;}
     document.getElementById('mpesaBtn').disabled=true;
     document.getElementById('cashBtn').disabled=true;
-    // Show waiting modal
-    const overlay=document.getElementById('modalOverlay');
     document.getElementById('modalContent').innerHTML=`
-      <div style="font-size:52px;margin-bottom:14px">📱</div>
+      <div style="font-size:48px;margin-bottom:12px">📱</div>
       <div class="modal-title">Awaiting Payment</div>
       <div class="modal-sub">M-Pesa prompt sent to</div>
       <div class="modal-phone">${phone}</div>
       <div class="modal-amount">KES ${amount.toLocaleString()}</div>
       <div class="spinner"></div>
-      <div style="color:var(--muted);font-size:12px">Ask customer to enter M-Pesa PIN</div>
+      <div style="color:var(--muted);font-size:11px">Ask customer to enter M-Pesa PIN</div>
       <br/><button class="btn-outline" onclick="cancelPayment()">Cancel</button>`;
-    overlay.classList.add('show');
+    document.getElementById('modalOverlay').classList.add('show');
     try{
       const r=await fetch('/api/pay',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({phone,customer,product:selectedProduct,qty,payment_method:'mpesa'})});
+        body:JSON.stringify({phone,customer,product:selectedProduct,qty,payment_method:'mpesa',destination})});
       const d=await r.json();
       if(!d.ok){showErrorModal(d.error);enablePayBtns();return;}
       pollPayment(d.checkout_id);
     }catch(e){showErrorModal(e.message);enablePayBtns();}
-
   }else{
-    // Cash
     document.getElementById('modalContent').innerHTML=`
-      <div style="font-size:52px;margin-bottom:14px">💵</div>
+      <div style="font-size:48px;margin-bottom:12px">💵</div>
       <div class="modal-title">Cash Payment</div>
-      <div class="modal-sub">Confirm you have received cash for</div>
+      <div class="modal-sub">Confirm you have received</div>
       <div class="cash-amount-display">KES ${amount.toLocaleString()}</div>
       <div class="cash-note">${selectedProduct.name} × ${qty}</div>
       <div class="cash-note">Customer: ${customer}</div>
@@ -430,15 +582,13 @@ async function initiatePayment(method){
 }
 
 async function confirmCash(customer,amount){
-  document.getElementById('modalContent').innerHTML=`<div class="spinner"></div><div style="color:var(--muted);font-size:13px">Recording sale…</div>`;
+  document.getElementById('modalContent').innerHTML=`<div class="spinner"></div><div style="color:var(--muted);font-size:12px">Recording sale…</div>`;
   try{
     const r=await fetch('/api/cash',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({customer,product:selectedProduct,qty,amount,payment_method:'cash'})});
     const d=await r.json();
-    if(d.ok){
-      showSuccessModal('cash');
-      loadProducts();loadRecentSales();resetCheckout();
-    }else{showErrorModal(d.error||'Failed to record sale');enablePayBtns();}
+    if(d.ok){showSuccessModal('cash');loadProducts();loadRecentSales();resetCheckout();}
+    else{showErrorModal(d.error||'Failed');enablePayBtns();}
   }catch(e){showErrorModal(e.message);enablePayBtns();}
 }
 
@@ -455,17 +605,16 @@ function pollPayment(ckid){
         loadProducts();loadRecentSales();resetCheckout();
       }
     }catch{}
-    if(attempts>=40){clearInterval(pollInterval);showErrorModal('Payment timed out. Please try again.');enablePayBtns();}
+    if(attempts>=40){clearInterval(pollInterval);showErrorModal('Payment timed out.');enablePayBtns();}
   },3000);
 }
 
 function showSuccessModal(method){
-  const label=method==='cash'?'💵 CASH RECEIVED':'✅ M-PESA PAID';
   document.getElementById('modalContent').innerHTML=`
     <div class="success-check">✓</div>
     <div class="modal-title">Payment Confirmed!</div>
-    <div class="modal-sub">Sale recorded and stock updated automatically.</div>
-    <div style="color:var(--green);font-family:var(--mono);font-size:20px;margin-bottom:24px">${label}</div>
+    <div class="modal-sub">Sale recorded. Stock updated automatically.</div>
+    <div style="color:var(--green);font-family:var(--mono);font-size:18px;margin-bottom:20px">${method==='cash'?'💵 CASH RECEIVED':'✅ M-PESA PAID'}</div>
     <button class="btn-primary" onclick="closeModal()">OK</button>`;
 }
 
@@ -498,43 +647,39 @@ async function loadRecentSales(){
     if(!d.ok)return;
     const sales=d.sales.slice(-8).reverse();
     const list=document.getElementById('recentList');
-    if(!sales.length){list.innerHTML='<div style="color:var(--muted);font-size:12px">No sales yet</div>';return;}
+    if(!sales.length){list.innerHTML='<div style="color:var(--muted);font-size:11px">No sales yet</div>';return;}
     list.innerHTML=sales.map(s=>{
       const isCash=(s['Notes']||'').toLowerCase().includes('cash');
       return `<div class="rs-item">
         <div><div class="rs-name">${s['Item']||'—'}</div>
-        <div class="rs-meta">${s['Customer Name']||'Walk-in'} · ×${s['Qty']||1} · ${isCash?'💵 Cash':'📱 M-Pesa'}</div></div>
+        <div class="rs-meta">${s['Customer Name']||'Walk-in'} · ×${s['Qty']||1} · ${isCash?'💵':'📱'}</div></div>
         <div class="rs-amount ${isCash?'cash':'mpesa'}">KES ${parseInt((s['Total Revenue (KES)']||'0').toString().replace(/,/g,'')||0).toLocaleString()}</div>
       </div>`;
     }).join('');
   }catch{}
 }
 
+// ── Dashboard ──
 async function loadDashboard(showSpin){
   const btn=document.getElementById('dashRefreshBtn');
-  if(showSpin) btn.classList.add('spinning');
+  if(showSpin)btn.classList.add('spinning');
   try{
     const [sr,pr]=await Promise.all([fetch('/api/sales'),fetch('/api/products')]);
-    const sd=await sr.json(); const pd=await pr.json();
+    const sd=await sr.json();const pd=await pr.json();
     const sales=sd.ok?sd.sales:[];
     const prods=pd.ok?pd.products:[];
     const todayDate=new Date().getDate();
-
     let totalRev=0,todayRev=0,todayCount=0,totalUnits=0;
     sales.forEach(s=>{
       const amt=parseInt((s['Total Revenue (KES)']||'0').toString().replace(/,/g,''))||0;
       const q=parseInt(s['Qty']||0)||0;
-      totalRev+=amt; totalUnits+=q;
-      const dateStr=s['Date']||'';
-      const dayNum=parseInt(dateStr.split('/')[0]);
-      if(dayNum===todayDate){todayRev+=amt;todayCount++;}
+      totalRev+=amt;totalUnits+=q;
+      if(parseInt((s['Date']||'').split('/')[0])===todayDate){todayRev+=amt;todayCount++;}
     });
-
     document.getElementById('kpiRevenue').textContent='KES '+totalRev.toLocaleString();
     document.getElementById('kpiToday').textContent='KES '+todayRev.toLocaleString();
     document.getElementById('kpiTodayCount').textContent=todayCount+' transactions';
     document.getElementById('kpiUnits').textContent=totalUnits.toLocaleString();
-
     const lowStock=prods.filter(p=>parseInt(p.stock)<=parseInt(p.reorder||0)&&p.name);
     document.getElementById('kpiLowStock').textContent=lowStock.length;
     if(lowStock.length>0){
@@ -543,37 +688,31 @@ async function loadDashboard(showSpin){
         `<div class="low-stock-item"><span>${p.name}</span><span style="color:var(--red);font-family:var(--mono)">${p.stock} left (min: ${p.reorder})</span></div>`
       ).join('');
     }else{document.getElementById('lowStockSection').style.display='none';}
-
-    // Category chart
     const catRev={};
     sales.forEach(s=>{
       const cat=s['Category']||'Other';
       const amt=parseInt((s['Total Revenue (KES)']||'0').toString().replace(/,/g,''))||0;
       catRev[cat]=(catRev[cat]||0)+amt;
     });
-    if(catChartInst) catChartInst.destroy();
+    if(catChartInst)catChartInst.destroy();
     catChartInst=new Chart(document.getElementById('catChart'),{
       type:'bar',
-      data:{labels:Object.keys(catRev),datasets:[{data:Object.values(catRev),backgroundColor:['#f0a500','#00c48c','#4fc3f7','#ff4d6d','#ce93d8','#ffb74d'],borderRadius:6}]},
+      data:{labels:Object.keys(catRev),datasets:[{data:Object.values(catRev),backgroundColor:['#f0a500','#00c48c','#4fc3f7','#ff4d6d','#ce93d8','#ffb74d'],borderRadius:5}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
         scales:{x:{ticks:{color:'#6b7fa8'},grid:{color:'#1e2f52'}},y:{ticks:{color:'#6b7fa8'},grid:{color:'#1e2f52'}}}}
     });
-
-    // Payment method chart
     let mpesaTotal=0,cashTotal=0;
     sales.forEach(s=>{
       const amt=parseInt((s['Total Revenue (KES)']||'0').toString().replace(/,/g,''))||0;
-      if((s['Notes']||'').toLowerCase().includes('cash')) cashTotal+=amt;
+      if((s['Notes']||'').toLowerCase().includes('cash'))cashTotal+=amt;
       else mpesaTotal+=amt;
     });
-    if(payChartInst) payChartInst.destroy();
+    if(payChartInst)payChartInst.destroy();
     payChartInst=new Chart(document.getElementById('payChart'),{
       type:'doughnut',
       data:{labels:['M-Pesa','Cash'],datasets:[{data:[mpesaTotal,cashTotal],backgroundColor:['#f0a500','#00c48c'],borderWidth:0}]},
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#e8edf8'}}}}
     });
-
-    // Top items
     const itemRev={};
     sales.forEach(s=>{
       const item=s['Item']||'';if(!item)return;
@@ -587,10 +726,90 @@ async function loadDashboard(showSpin){
         <span class="top-item-name">${name}</span>
         <div class="top-item-bar-wrap"><div class="top-item-bar" style="width:${(val/maxVal*100).toFixed(0)}%"></div></div>
         <span class="top-item-val">KES ${val.toLocaleString()}</span>
-      </div>`).join(''):'<div style="color:var(--muted);font-size:13px">No sales data yet</div>';
+      </div>`).join(''):'<div style="color:var(--muted);font-size:12px">No sales data yet</div>';
+  }catch(e){console.error(e);}
+  if(showSpin)setTimeout(()=>btn.classList.remove('spinning'),800);
+}
 
-  }catch(e){console.error('Dashboard error:',e);}
-  if(showSpin) setTimeout(()=>btn.classList.remove('spinning'),800);
+// ── Settings ──
+function loadSettingsPage(){
+  if(!currentUser)return;
+  document.getElementById('settingSheetId').value=currentUser.sheet_id||'';
+  document.getElementById('settingApiKey').value=currentUser.api_key||'';
+  document.getElementById('settingMpesaPhone').value=currentUser.mpesa_phone||'';
+  document.getElementById('settingTill').value=currentUser.till_number||'';
+  document.getElementById('settingPaybill').value=currentUser.paybill_number||'';
+  document.getElementById('accountInfo').innerHTML=`
+    <span>👤 Name: <strong>${currentUser.name}</strong></span><br>
+    <span>📧 Email: <strong>${currentUser.email}</strong></span><br>
+    <span>📱 Phone: <strong>${currentUser.phone}</strong></span><br>
+    <span>🏢 Business: <strong>${currentUser.business_name}</strong></span>
+  `;
+}
+
+async function saveSheetSettings(){
+  const sheet_id=document.getElementById('settingSheetId').value.trim();
+  const api_key=document.getElementById('settingApiKey').value.trim();
+  if(!sheet_id||!api_key){showToast('Enter both Sheet ID and API Key','error');return;}
+  const r=await fetch('/api/update_profile',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({sheet_id,api_key,
+      mpesa_phone:currentUser?.mpesa_phone||'',
+      till_number:currentUser?.till_number||'',
+      paybill_number:currentUser?.paybill_number||''})});
+  const d=await r.json();
+  if(d.ok){
+    currentUser.sheet_id=sheet_id;currentUser.api_key=api_key;
+    document.getElementById('sheetSaveMsg').style.display='block';
+    setTimeout(()=>document.getElementById('sheetSaveMsg').style.display='none',3000);
+    loadProducts();
+    showToast('Sheet connected!','success');
+  }else{showToast(d.error||'Failed to save','error');}
+}
+
+async function saveMpesaSettings(){
+  const mpesa_phone=document.getElementById('settingMpesaPhone').value.trim();
+  const till_number=document.getElementById('settingTill').value.trim();
+  const paybill_number=document.getElementById('settingPaybill').value.trim();
+  const r=await fetch('/api/update_profile',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({mpesa_phone,till_number,paybill_number,
+      sheet_id:currentUser?.sheet_id||'',
+      api_key:currentUser?.api_key||''})});
+  const d=await r.json();
+  if(d.ok){
+    currentUser.mpesa_phone=mpesa_phone;
+    currentUser.till_number=till_number;
+    currentUser.paybill_number=paybill_number;
+    document.getElementById('mpesaSaveMsg').style.display='block';
+    setTimeout(()=>document.getElementById('mpesaSaveMsg').style.display='none',3000);
+    // Update topbar
+    let payInfo='';
+    if(mpesa_phone)payInfo+=`📱 ${mpesa_phone}`;
+    if(till_number)payInfo+=(payInfo?' · ':'')+`🏪 Till: ${till_number}`;
+    if(paybill_number)payInfo+=(payInfo?' · ':'')+`🏦 Paybill: ${paybill_number}`;
+    document.getElementById('userPayInfo').innerHTML=`<span style="font-size:11px">${payInfo}</span>`;
+    showToast('M-Pesa details saved!','success');
+  }else{showToast(d.error||'Failed to save','error');}
+}
+
+async function changePassword(){
+  const old_password=document.getElementById('oldPassword').value.trim();
+  const new_password=document.getElementById('newPassword').value.trim();
+  if(!old_password||!new_password){showToast('Fill in both fields','error');return;}
+  if(new_password.length<6){showToast('New password must be at least 6 characters','error');return;}
+  const r=await fetch('/api/change_password',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({old_password,new_password})});
+  const d=await r.json();
+  if(d.ok){
+    document.getElementById('pwdSaveMsg').style.display='block';
+    document.getElementById('oldPassword').value='';
+    document.getElementById('newPassword').value='';
+    setTimeout(()=>document.getElementById('pwdSaveMsg').style.display='none',3000);
+    showToast('Password changed!','success');
+  }else{
+    document.getElementById('pwdErrorMsg').textContent='❌ '+d.error;
+    document.getElementById('pwdErrorMsg').style.display='block';
+    setTimeout(()=>document.getElementById('pwdErrorMsg').style.display='none',4000);
+  }
 }
 
 function showToast(msg,type='success'){
@@ -599,24 +818,7 @@ function showToast(msg,type='success'){
   setTimeout(()=>t.classList.remove('show'),3500);
 }
 
-async function doLogout(){
-  await fetch('/api/logout',{method:'POST'});
-  window.location.href='/login';
-}
-
-async function loadUserInfo(){
-  try{
-    const r=await fetch('/api/me');
-    const d=await r.json();
-    if(d.ok){
-      const u=d.user;
-      document.getElementById('userInfo').innerHTML=
-        `<span style="color:var(--text)">${u.business_name||u.name}</span>
-         ${u.till_number?`<span style="color:var(--gold);font-family:var(--mono);margin-left:6px">Till: ${u.till_number}</span>`:''}`;
-    }
-  }catch{}
-}
-
+// Init
 loadUserInfo();
 loadProducts();
 setInterval(loadRecentSales,30000);
