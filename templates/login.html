@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Uniform Shop — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--navy:#0f1e3d;--gold:#f0a500;--gold2:#ffc93c;--green:#00c48c;--red:#ff4d6d;--bg:#080f20;--card:#111d38;--border:#1e2f52;--text:#e8edf8;--muted:#6b7fa8;--font:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.container{width:100%;max-width:420px;}
+.logo-wrap{text-align:center;margin-bottom:32px;}
+.logo{width:64px;height:64px;background:var(--gold);border-radius:18px;display:inline-flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:12px;}
+.app-name{font-size:22px;font-weight:700;}
+.app-sub{font-size:13px;color:var(--muted);margin-top:4px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;}
+.tab-row{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:28px;}
+.tab{padding:10px;border-radius:9px;border:none;background:none;color:var(--muted);font-family:var(--font);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;}
+.tab.active{background:var(--card);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.form-section{display:none;}
+.form-section.active{display:block;}
+.form-group{margin-bottom:16px;}
+.form-label{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:6px;display:block;}
+.form-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border-color .2s;}
+.form-input:focus{border-color:var(--gold);}
+.form-input::placeholder{color:var(--muted);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.submit-btn{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;margin-top:8px;}
+.submit-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(240,165,0,.35);}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.divider{text-align:center;color:var(--muted);font-size:12px;margin:16px 0;position:relative;}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border);}
+.divider::before{left:0;}.divider::after{right:0;}
+.error-msg{background:rgba(255,77,109,.1);border:1px solid var(--red);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:16px;display:none;}
+.success-msg{background:rgba(0,196,140,.1);border:1px solid var(--green);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--green);margin-bottom:16px;display:none;}
+.section-title{font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin:20px 0 12px;border-top:1px solid var(--border);padding-top:16px;}
+.spinner{width:20px;height:20px;border:2px solid rgba(0,0,0,.3);border-top-color:var(--navy);border-radius:50%;animation:spin 1s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="logo-wrap">
+    <div class="logo">🏫</div>
+    <div class="app-name">School Uniforms POS</div>
+    <div class="app-sub">Business Management System</div>
+  </div>
+
+  <div class="card">
+    <div class="tab-row">
+      <button class="tab active" onclick="switchTab('login',this)">Login</button>
+      <button class="tab" onclick="switchTab('signup',this)">Sign Up</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="form-section active" id="section-login">
+      <div class="error-msg" id="loginError"></div>
+      <div class="success-msg" id="loginSuccess"></div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" id="loginEmail" type="email" placeholder="you@example.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" id="loginPassword" type="password" placeholder="Your password"/>
+      </div>
+      <button class="submit-btn" id="loginBtn" onclick="doLogin()">Login to Dashboard</button>
+    </div>
+
+    <!-- SIGNUP -->
+    <div class="form-section" id="section-signup">
+      <div class="error-msg" id="signupError"></div>
+      <div class="success-msg" id="signupSuccess"></div>
+
+      <div class="form-group">
+        <label class="form-label">Business Name</label>
+        <input class="form-input" id="signupBusiness" type="text" placeholder="e.g. ABC Uniforms"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Your Name</label>
+          <input class="form-input" id="signupName" type="text" placeholder="Full name"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input class="form-input" id="signupPhone" type="tel" placeholder="07XX XXX XXX"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" id="signupEmail" type="email" placeholder="you@example.com"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" id="signupPassword" type="password" placeholder="Min 6 characters"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm Password</label>
+          <input class="form-input" id="signupConfirm" type="password" placeholder="Repeat password"/>
+        </div>
+      </div>
+
+      <div class="section-title">💳 M-Pesa Payment Details</div>
+      <div class="form-group">
+        <label class="form-label">Till Number (for customer payments)</label>
+        <input class="form-input" id="signupTill" type="text" placeholder="e.g. 123456"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Paybill Number (optional)</label>
+        <input class="form-input" id="signupPaybill" type="text" placeholder="e.g. 123456"/>
+      </div>
+      <button class="submit-btn" id="signupBtn" onclick="doSignup()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('section-' + tab).classList.add('active');
+}
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 5000);
+}
+
+function showSuccess(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display = 'block';
+}
+
+async function doLogin() {
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+  if (!email || !password) { showError('loginError', 'Please fill in all fields'); return; }
+
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Logging in…';
+
+  try {
+    const r = await fetch('/api/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({email, password})
+    });
+    const d = await r.json();
+    if (d.ok) {
+      showSuccess('loginSuccess', '✅ Login successful! Redirecting…');
+      setTimeout(() => window.location.href = '/', 1000);
+    } else {
+      showError('loginError', d.error || 'Login failed');
+      btn.disabled = false;
+      btn.innerHTML = 'Login to Dashboard';
+    }
+  } catch(e) {
+    showError('loginError', 'Connection error. Please try again.');
+    btn.disabled = false;
+    btn.innerHTML = 'Login to Dashboard';
+  }
+}
+
+async function doSignup() {
+  const business  = document.getElementById('signupBusiness').value.trim();
+  const name      = document.getElementById('signupName').value.trim();
+  const phone     = document.getElementById('signupPhone').value.trim();
+  const email     = document.getElementById('signupEmail').value.trim();
+  const password  = document.getElementById('signupPassword').value.trim();
+  const confirm   = document.getElementById('signupConfirm').value.trim();
+  const till      = document.getElementById('signupTill').value.trim();
+  const paybill   = document.getElementById('signupPaybill').value.trim();
+
+  if (!business || !name || !phone || !email || !password) { showError('signupError', 'Please fill in all required fields'); return; }
+  if (password.length < 6) { showError('signupError', 'Password must be at least 6 characters'); return; }
+  if (password !== confirm) { showError('signupError', 'Passwords do not match'); return; }
+
+  const btn = document.getElementById('signupBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Creating account…';
+
+  try {
+    const r = await fetch('/api/signup', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({business_name: business, name, phone, email, password, till_number: till, paybill_number: paybill})
+    });
+    const d = await r.json();
+    if (d.ok) {
+      showSuccess('signupSuccess', '✅ Account created! Redirecting…');
+      setTimeout(() => window.location.href = '/', 1000);
+    } else {
+      showError('signupError', d.error || 'Signup failed');
+      btn.disabled = false;
+      btn.innerHTML = 'Create Account';
+    }
+  } catch(e) {
+    showError('signupError', 'Connection error. Please try again.');
+    btn.disabled = false;
+    btn.innerHTML = 'Create Account';
+  }
+}
+
+// Allow Enter key to submit
+document.addEventListener('keypress', e => {
+  if (e.key === 'Enter') {
+    const loginActive = document.getElementById('section-login').classList.contains('active');
+    if (loginActive) doLogin(); else doSignup();
+  }
+});
+</script>
+</body>
+</html>
