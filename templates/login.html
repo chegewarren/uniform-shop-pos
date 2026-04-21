@@ -4,39 +4,42 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Uniform Shop — Login</title>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
 <style>
-:root{--navy:#0f1e3d;--gold:#f0a500;--gold2:#ffc93c;--green:#00c48c;--red:#ff4d6d;--bg:#080f20;--card:#111d38;--border:#1e2f52;--text:#e8edf8;--muted:#6b7fa8;--font:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;}
+:root{--navy:#0f1e3d;--gold:#f0a500;--gold2:#ffc93c;--green:#00c48c;--red:#ff4d6d;--bg:#080f20;--card:#111d38;--border:#1e2f52;--text:#e8edf8;--muted:#6b7fa8;--font:'Sora',sans-serif;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
-.container{width:100%;max-width:420px;}
-.logo-wrap{text-align:center;margin-bottom:32px;}
-.logo{width:64px;height:64px;background:var(--gold);border-radius:18px;display:inline-flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:12px;}
-.app-name{font-size:22px;font-weight:700;}
-.app-sub{font-size:13px;color:var(--muted);margin-top:4px;}
-.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;}
-.tab-row{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--bg);border-radius:12px;padding:4px;margin-bottom:28px;}
-.tab{padding:10px;border-radius:9px;border:none;background:none;color:var(--muted);font-family:var(--font);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;}
+.container{width:100%;max-width:460px;}
+.logo-wrap{text-align:center;margin-bottom:24px;}
+.logo{width:60px;height:60px;background:var(--gold);border-radius:16px;display:inline-flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:10px;}
+.app-name{font-size:21px;font-weight:700;}
+.app-sub{font-size:12px;color:var(--muted);margin-top:3px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:26px;}
+.tab-row{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--bg);border-radius:11px;padding:4px;margin-bottom:22px;}
+.tab{padding:9px;border-radius:8px;border:none;background:none;color:var(--muted);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;}
 .tab.active{background:var(--card);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3);}
 .form-section{display:none;}
 .form-section.active{display:block;}
-.form-group{margin-bottom:16px;}
-.form-label{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:6px;display:block;}
-.form-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border-color .2s;}
+.form-group{margin-bottom:13px;}
+.form-label{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:5px;display:block;}
+.form-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:11px 13px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color .2s;}
 .form-input:focus{border-color:var(--gold);}
 .form-input::placeholder{color:var(--muted);}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.submit-btn{width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s;margin-top:8px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.submit-btn{width:100%;padding:13px;border:none;border-radius:11px;background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;transition:all .2s;margin-top:6px;}
 .submit-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(240,165,0,.35);}
 .submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
-.divider{text-align:center;color:var(--muted);font-size:12px;margin:16px 0;position:relative;}
-.divider::before,.divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border);}
-.divider::before{left:0;}.divider::after{right:0;}
-.error-msg{background:rgba(255,77,109,.1);border:1px solid var(--red);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:16px;display:none;}
-.success-msg{background:rgba(0,196,140,.1);border:1px solid var(--green);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--green);margin-bottom:16px;display:none;}
-.section-title{font-size:13px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin:20px 0 12px;border-top:1px solid var(--border);padding-top:16px;}
-.spinner{width:20px;height:20px;border:2px solid rgba(0,0,0,.3);border-top-color:var(--navy);border-radius:50%;animation:spin 1s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px;}
+.error-msg{background:rgba(255,77,109,.1);border:1px solid var(--red);border-radius:9px;padding:9px 13px;font-size:12px;color:var(--red);margin-bottom:13px;display:none;}
+.success-msg{background:rgba(0,196,140,.1);border:1px solid var(--green);border-radius:9px;padding:9px 13px;font-size:12px;color:var(--green);margin-bottom:13px;display:none;}
+.section-title{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin:16px 0 11px;border-top:1px solid var(--border);padding-top:13px;}
+.forgot-link{font-size:12px;color:var(--muted);text-align:right;margin-top:8px;cursor:pointer;display:block;}
+.forgot-link:hover{color:var(--gold);}
+.spinner{width:16px;height:16px;border:2px solid rgba(0,0,0,.3);border-top-color:var(--navy);border-radius:50%;animation:spin 1s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px;}
 @keyframes spin{to{transform:rotate(360deg)}}
+.temp-pwd-box{background:var(--bg);border:2px solid var(--gold);border-radius:10px;padding:14px;text-align:center;margin:12px 0;}
+.temp-pwd{font-family:monospace;font-size:22px;font-weight:700;color:var(--gold);letter-spacing:3px;}
+.temp-note{font-size:11px;color:var(--muted);margin-top:6px;}
+.sheet-help{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -46,7 +49,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
     <div class="app-name">School Uniforms POS</div>
     <div class="app-sub">Business Management System</div>
   </div>
-
   <div class="card">
     <div class="tab-row">
       <button class="tab active" onclick="switchTab('login',this)">Login</button>
@@ -64,8 +66,33 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       <div class="form-group">
         <label class="form-label">Password</label>
         <input class="form-input" id="loginPassword" type="password" placeholder="Your password"/>
+        <span class="forgot-link" onclick="switchTab('forgot',document.querySelector('.tab'))">Forgot password?</span>
       </div>
       <button class="submit-btn" id="loginBtn" onclick="doLogin()">Login to Dashboard</button>
+    </div>
+
+    <!-- FORGOT PASSWORD -->
+    <div class="form-section" id="section-forgot">
+      <div class="error-msg" id="forgotError"></div>
+      <div class="success-msg" id="forgotSuccess"></div>
+      <div id="forgotForm">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Enter your email and we'll generate a temporary password for you.</p>
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <input class="form-input" id="forgotEmail" type="email" placeholder="you@example.com"/>
+        </div>
+        <button class="submit-btn" id="forgotBtn" onclick="doForgot()">Get Temporary Password</button>
+      </div>
+      <div id="tempPwdResult" style="display:none">
+        <div class="temp-pwd-box">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Your temporary password is:</div>
+          <div class="temp-pwd" id="tempPwdValue"></div>
+          <div class="temp-note">⚠️ Write this down! Use it to login, then change your password in Settings.</div>
+        </div>
+        <button class="submit-btn" onclick="switchTab('login',document.querySelectorAll('.tab')[0])">Go to Login</button>
+      </div>
+      <br/>
+      <span class="forgot-link" onclick="switchTab('login',document.querySelectorAll('.tab')[0])">← Back to Login</span>
     </div>
 
     <!-- SIGNUP -->
@@ -73,9 +100,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
       <div class="error-msg" id="signupError"></div>
       <div class="success-msg" id="signupSuccess"></div>
 
+      <div class="section-title" style="border-top:none;padding-top:0;margin-top:0">👤 Account Details</div>
       <div class="form-group">
         <label class="form-label">Business Name</label>
-        <input class="form-input" id="signupBusiness" type="text" placeholder="e.g. ABC Uniforms"/>
+        <input class="form-input" id="signupBusiness" type="text" placeholder="e.g. ABC Uniforms Shop"/>
       </div>
       <div class="form-row">
         <div class="form-group">
@@ -104,13 +132,32 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 
       <div class="section-title">💳 M-Pesa Payment Details</div>
       <div class="form-group">
-        <label class="form-label">Till Number (for customer payments)</label>
-        <input class="form-input" id="signupTill" type="text" placeholder="e.g. 123456"/>
+        <label class="form-label">Personal M-Pesa Number (payments go to your phone)</label>
+        <input class="form-input" id="signupMpesaPhone" type="tel" placeholder="e.g. 0712 345 678"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Till Number (optional)</label>
+          <input class="form-input" id="signupTill" type="text" placeholder="e.g. 123456"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Paybill Number (optional)</label>
+          <input class="form-input" id="signupPaybill" type="text" placeholder="e.g. 123456"/>
+        </div>
+      </div>
+
+      <div class="section-title">📊 Your Google Sheet</div>
+      <div class="form-group">
+        <label class="form-label">Google Sheet ID</label>
+        <input class="form-input" id="signupSheetId" type="text" placeholder="Paste your Sheet ID here"/>
+        <div class="sheet-help">Found in your Google Sheet URL: docs.google.com/spreadsheets/d/<strong>THIS_PART</strong>/edit</div>
       </div>
       <div class="form-group">
-        <label class="form-label">Paybill Number (optional)</label>
-        <input class="form-input" id="signupPaybill" type="text" placeholder="e.g. 123456"/>
+        <label class="form-label">Google API Key</label>
+        <input class="form-input" id="signupApiKey" type="text" placeholder="AIzaSy..."/>
+        <div class="sheet-help">Get from console.cloud.google.com → Credentials → API Key. Make sure Sheets API is enabled and sheet is shared publicly as Editor.</div>
       </div>
+
       <button class="submit-btn" id="signupBtn" onclick="doSignup()">Create Account</button>
     </div>
   </div>
@@ -120,16 +167,15 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 function switchTab(tab, btn) {
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
-  btn.classList.add('active');
+  if (btn) btn.classList.add('active');
   document.getElementById('section-' + tab).classList.add('active');
 }
 
 function showError(id, msg) {
   const el = document.getElementById(id);
   el.textContent = msg; el.style.display = 'block';
-  setTimeout(() => el.style.display = 'none', 5000);
+  setTimeout(() => el.style.display = 'none', 6000);
 }
-
 function showSuccess(id, msg) {
   const el = document.getElementById(id);
   el.textContent = msg; el.style.display = 'block';
@@ -139,78 +185,67 @@ async function doLogin() {
   const email    = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value.trim();
   if (!email || !password) { showError('loginError', 'Please fill in all fields'); return; }
-
   const btn = document.getElementById('loginBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Logging in…';
-
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Logging in…';
   try {
-    const r = await fetch('/api/login', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({email, password})
-    });
+    const r = await fetch('/api/login', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email, password})});
+    const d = await r.json();
+    if (d.ok) { showSuccess('loginSuccess', '✅ Login successful! Redirecting…'); setTimeout(() => window.location.href='/', 800); }
+    else { showError('loginError', d.error || 'Login failed'); btn.disabled=false; btn.innerHTML='Login to Dashboard'; }
+  } catch(e) { showError('loginError', 'Connection error'); btn.disabled=false; btn.innerHTML='Login to Dashboard'; }
+}
+
+async function doForgot() {
+  const email = document.getElementById('forgotEmail').value.trim();
+  if (!email) { showError('forgotError', 'Please enter your email'); return; }
+  const btn = document.getElementById('forgotBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Generating…';
+  try {
+    const r = await fetch('/api/forgot_password', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email})});
     const d = await r.json();
     if (d.ok) {
-      showSuccess('loginSuccess', '✅ Login successful! Redirecting…');
-      setTimeout(() => window.location.href = '/', 1000);
-    } else {
-      showError('loginError', d.error || 'Login failed');
-      btn.disabled = false;
-      btn.innerHTML = 'Login to Dashboard';
-    }
-  } catch(e) {
-    showError('loginError', 'Connection error. Please try again.');
-    btn.disabled = false;
-    btn.innerHTML = 'Login to Dashboard';
-  }
+      document.getElementById('forgotForm').style.display = 'none';
+      document.getElementById('tempPwdValue').textContent = d.temp_password;
+      document.getElementById('tempPwdResult').style.display = 'block';
+    } else { showError('forgotError', d.error || 'Email not found'); btn.disabled=false; btn.innerHTML='Get Temporary Password'; }
+  } catch(e) { showError('forgotError', 'Connection error'); btn.disabled=false; btn.innerHTML='Get Temporary Password'; }
 }
 
 async function doSignup() {
-  const business  = document.getElementById('signupBusiness').value.trim();
-  const name      = document.getElementById('signupName').value.trim();
-  const phone     = document.getElementById('signupPhone').value.trim();
-  const email     = document.getElementById('signupEmail').value.trim();
-  const password  = document.getElementById('signupPassword').value.trim();
-  const confirm   = document.getElementById('signupConfirm').value.trim();
-  const till      = document.getElementById('signupTill').value.trim();
-  const paybill   = document.getElementById('signupPaybill').value.trim();
+  const business   = document.getElementById('signupBusiness').value.trim();
+  const name       = document.getElementById('signupName').value.trim();
+  const phone      = document.getElementById('signupPhone').value.trim();
+  const email      = document.getElementById('signupEmail').value.trim();
+  const password   = document.getElementById('signupPassword').value.trim();
+  const confirm    = document.getElementById('signupConfirm').value.trim();
+  const mpesa_phone= document.getElementById('signupMpesaPhone').value.trim();
+  const till       = document.getElementById('signupTill').value.trim();
+  const paybill    = document.getElementById('signupPaybill').value.trim();
+  const sheet_id   = document.getElementById('signupSheetId').value.trim();
+  const api_key    = document.getElementById('signupApiKey').value.trim();
 
-  if (!business || !name || !phone || !email || !password) { showError('signupError', 'Please fill in all required fields'); return; }
-  if (password.length < 6) { showError('signupError', 'Password must be at least 6 characters'); return; }
-  if (password !== confirm) { showError('signupError', 'Passwords do not match'); return; }
+  if (!business||!name||!phone||!email||!password) { showError('signupError','Please fill in all required fields'); return; }
+  if (password.length < 6) { showError('signupError','Password must be at least 6 characters'); return; }
+  if (password !== confirm) { showError('signupError','Passwords do not match'); return; }
 
   const btn = document.getElementById('signupBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Creating account…';
-
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Creating account…';
   try {
-    const r = await fetch('/api/signup', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({business_name: business, name, phone, email, password, till_number: till, paybill_number: paybill})
-    });
+    const r = await fetch('/api/signup', {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({business_name:business, name, phone, email, password,
+                            mpesa_phone, till_number:till, paybill_number:paybill,
+                            sheet_id, api_key})});
     const d = await r.json();
-    if (d.ok) {
-      showSuccess('signupSuccess', '✅ Account created! Redirecting…');
-      setTimeout(() => window.location.href = '/', 1000);
-    } else {
-      showError('signupError', d.error || 'Signup failed');
-      btn.disabled = false;
-      btn.innerHTML = 'Create Account';
-    }
-  } catch(e) {
-    showError('signupError', 'Connection error. Please try again.');
-    btn.disabled = false;
-    btn.innerHTML = 'Create Account';
-  }
+    if (d.ok) { showSuccess('signupSuccess','✅ Account created! Redirecting…'); setTimeout(()=>window.location.href='/',800); }
+    else { showError('signupError', d.error||'Signup failed'); btn.disabled=false; btn.innerHTML='Create Account'; }
+  } catch(e) { showError('signupError','Connection error'); btn.disabled=false; btn.innerHTML='Create Account'; }
 }
 
-// Allow Enter key to submit
 document.addEventListener('keypress', e => {
-  if (e.key === 'Enter') {
-    const loginActive = document.getElementById('section-login').classList.contains('active');
-    if (loginActive) doLogin(); else doSignup();
+  if (e.key==='Enter') {
+    if (document.getElementById('section-login').classList.contains('active')) doLogin();
+    else if (document.getElementById('section-signup').classList.contains('active')) doSignup();
+    else if (document.getElementById('section-forgot').classList.contains('active')) doForgot();
   }
 });
 </script>
