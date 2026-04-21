@@ -155,6 +155,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
     <div class="dot"></div>
     <span class="status-txt">Live</span>
     <div class="topbar-time" id="clock">--:--:--</div>
+    <div id="userInfo" style="font-size:12px;color:var(--muted);padding:0 8px;border-left:1px solid var(--border);margin-left:6px;"></div>
+    <button onclick="doLogout()" style="padding:6px 14px;background:none;border:1px solid var(--border);border-radius:8px;color:var(--muted);font-family:var(--font);font-size:12px;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">Logout</button>
   </div>
 </div>
 
@@ -597,6 +599,25 @@ function showToast(msg,type='success'){
   setTimeout(()=>t.classList.remove('show'),3500);
 }
 
+async function doLogout(){
+  await fetch('/api/logout',{method:'POST'});
+  window.location.href='/login';
+}
+
+async function loadUserInfo(){
+  try{
+    const r=await fetch('/api/me');
+    const d=await r.json();
+    if(d.ok){
+      const u=d.user;
+      document.getElementById('userInfo').innerHTML=
+        `<span style="color:var(--text)">${u.business_name||u.name}</span>
+         ${u.till_number?`<span style="color:var(--gold);font-family:var(--mono);margin-left:6px">Till: ${u.till_number}</span>`:''}`;
+    }
+  }catch{}
+}
+
+loadUserInfo();
 loadProducts();
 setInterval(loadRecentSales,30000);
 </script>
