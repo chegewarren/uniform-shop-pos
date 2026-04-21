@@ -102,19 +102,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
         </div>
       </div>
 
-     <div class="section-title">💳 M-Pesa Payment Details</div>
-<div class="form-group">
-  <label class="form-label">Personal M-Pesa Number (payments to your phone)</label>
-  <input class="form-input" id="signupMpesaPhone" type="tel" placeholder="e.g. 0712 345 678"/>
-</div>
-<div class="form-group">
-  <label class="form-label">Till Number (optional)</label>
-  <input class="form-input" id="signupTill" type="text" placeholder="e.g. 123456"/>
-</div>
-<div class="form-group">
-  <label class="form-label">Paybill Number (optional)</label>
-  <input class="form-input" id="signupPaybill" type="text" placeholder="e.g. 123456"/>
-</div>
+      <div class="section-title">💳 M-Pesa Payment Details</div>
+      <div class="form-group">
+        <label class="form-label">Till Number (for customer payments)</label>
+        <input class="form-input" id="signupTill" type="text" placeholder="e.g. 123456"/>
+      </div>
       <div class="form-group">
         <label class="form-label">Paybill Number (optional)</label>
         <input class="form-input" id="signupPaybill" type="text" placeholder="e.g. 123456"/>
@@ -181,9 +173,8 @@ async function doSignup() {
   const email     = document.getElementById('signupEmail').value.trim();
   const password  = document.getElementById('signupPassword').value.trim();
   const confirm   = document.getElementById('signupConfirm').value.trim();
-  const mpesa_phone = document.getElementById('signupMpesaPhone').value.trim();
-const till        = document.getElementById('signupTill').value.trim();
-const paybill     = document.getElementById('signupPaybill').value.trim();
+  const till      = document.getElementById('signupTill').value.trim();
+  const paybill   = document.getElementById('signupPaybill').value.trim();
 
   if (!business || !name || !phone || !email || !password) { showError('signupError', 'Please fill in all required fields'); return; }
   if (password.length < 6) { showError('signupError', 'Password must be at least 6 characters'); return; }
@@ -197,7 +188,7 @@ const paybill     = document.getElementById('signupPaybill').value.trim();
     const r = await fetch('/api/signup', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({business_name: business, name, phone, email, password, mpesa_phone, till_number: till, paybill_number: paybill})
+      body: JSON.stringify({business_name: business, name, phone, email, password, till_number: till, paybill_number: paybill})
     });
     const d = await r.json();
     if (d.ok) {
