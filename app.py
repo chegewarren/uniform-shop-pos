@@ -69,7 +69,10 @@ def stk_push(phone, amount, account_ref, description, shortcode):
     token     = mpesa_token()
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
     password  = base64.b64encode(f"{shortcode}{PASSKEY}{timestamp}".encode()).decode()
-    tx_type   = "CustomerBuyGoodsOnline" if len(str(shortcode)) <= 7 else "CustomerPayBillOnline"
+    if MPESA_ENV == "sandbox":
+        tx_type = "CustomerPayBillOnline"
+    else:
+        tx_type = "CustomerBuyGoodsOnline" if len(str(shortcode)) <= 7 else "CustomerPayBillOnline"
     payload = {
         "BusinessShortCode": shortcode,
         "Password":          password,
