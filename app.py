@@ -315,11 +315,11 @@ def pay():
         shortcode = "174379"
     else:
         if destination == "till":
-            shortcode = user.get("till_number","")
+            shortcode = str(user.get("till_number","") or "")
         elif destination == "paybill":
-            shortcode = user.get("paybill_number","")
+            shortcode = str(user.get("paybill_number","") or "")
         else:
-            mp = user.get("mpesa_phone","").replace("+","").replace(" ","")
+            mp = str(user.get("mpesa_phone","") or "").replace("+","").replace(" ","")
             if mp.startswith("0"): mp = "254" + mp[1:]
             shortcode = mp
 
