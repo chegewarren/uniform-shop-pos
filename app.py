@@ -22,7 +22,13 @@ def hash_password(p):
 
 def script_post(data):
     try:
-        r = requests.post(APPS_SCRIPT, json=data, timeout=15, allow_redirects=True)
+        r = requests.post(APPS_SCRIPT, json=data, timeout=30, allow_redirects=True)
+        text = r.text.strip()
+        if not text:
+            return {"ok": False, "error": "Empty response from script"}
+        # Strip any HTML wrapper if present
+        if text.startswith('<'):
+            return {"ok": False, "error": "Script returned HTML - redeploy Apps Script"}
         return r.json()
     except Exception as e:
         return {"ok": False, "error": str(e)}
