@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Sales Records</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--navy:#0f1e3d;--gold:#f0a500;--gold2:#ffc93c;--green:#00c48c;--red:#ff4d6d;--bg:#080f20;--card:#111d38;--card2:#162040;--border:#1e2f52;--text:#e8edf8;--muted:#6b7fa8;--font:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;--topbar-h:60px;--safe-bottom:env(safe-area-inset-bottom,0px);}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100%;}
+.topbar{background:var(--navy);border-bottom:1px solid var(--border);padding:0 16px;height:var(--topbar-h);display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:200;}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.back-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none;}
+.page-title{font-size:15px;font-weight:700;}
+.page-sub{font-size:10px;color:var(--muted);}
+.main{margin-top:var(--topbar-h);padding:20px 16px calc(24px + var(--safe-bottom));max-width:900px;margin-left:auto;margin-right:auto;}
+/* FILTER BAR */
+.filter-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
+.period-select{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;cursor:pointer;transition:border-color .2s;}
+.period-select:focus{border-color:var(--gold);}
+.date-input{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;transition:border-color .2s;flex:1;min-width:0;}
+.date-input:focus{border-color:var(--gold);}
+.load-btn{background:var(--gold);color:var(--navy);border:none;border-radius:10px;padding:10px 18px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;}
+/* SUMMARY CARDS */
+.summary-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.sum-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;}
+.sum-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
+.sum-val{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--gold);}
+.sum-val.green{color:var(--green);}
+/* SALES LIST */
+.section-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;}
+.sale-card{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;}
+.sale-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;}
+.sale-left{}
+.sale-txn{font-family:var(--mono);font-size:12px;color:var(--muted);}
+.sale-customer{font-size:14px;font-weight:600;margin:2px 0;}
+.sale-time{font-size:11px;color:var(--muted);}
+.sale-right{text-align:right;}
+.sale-amount{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--green);}
+.sale-mpesa{font-size:11px;color:var(--muted);margin-top:2px;}
+.sale-arrow{font-size:16px;color:var(--muted);margin-left:10px;transition:transform .2s;}
+.sale-arrow.open{transform:rotate(90deg);}
+.sale-items{display:none;border-top:1px solid var(--border);padding:12px 16px;background:var(--card2);}
+.sale-items.show{display:block;}
+.item-row{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--border);}
+.item-row:last-child{border-bottom:none;}
+.item-name{color:var(--text);}
+.item-qty{color:var(--muted);margin-left:6px;}
+.item-sub{font-family:var(--mono);color:var(--gold);}
+/* empty */
+.empty{text-align:center;padding:60px 20px;color:var(--muted);}
+.empty .icon{font-size:44px;margin-bottom:12px;}
+.empty p{font-size:14px;}
+/* loading */
+.loading{text-align:center;padding:40px;color:var(--muted);}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* NAV tabs */
+.page-tabs{display:flex;gap:8px;margin-bottom:20px;}
+.tab-link{padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;text-decoration:none;color:var(--muted);border:1px solid var(--border);background:var(--card);transition:all .2s;}
+.tab-link.active{background:var(--gold);color:var(--navy);border-color:var(--gold);}
+@media(min-width:700px){.main{padding:28px 28px calc(28px + var(--safe-bottom));}.summary-row{grid-template-columns:1fr 1fr 1fr 1fr;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-left">
+    <a class="back-btn" href="/">‹</a>
+    <div>
+      <div class="page-title">📋 Sales Records</div>
+      <div class="page-sub" id="bizSub">Loading…</div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-tabs">
+    <a class="tab-link active" href="/sales">Sales Records</a>
+    <a class="tab-link" href="/expenses">Expenses</a>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <select class="period-select" id="periodSelect" onchange="onPeriodChange()">
+      <option value="daily">Daily</option>
+      <option value="monthly">Monthly</option>
+      <option value="yearly">Yearly</option>
+    </select>
+    <!-- Daily: date picker -->
+    <input class="date-input" type="date" id="dateInput" style="display:none"/>
+    <!-- Monthly: month + year -->
+    <select class="period-select" id="monthSelect" style="display:none">
+      <option value="1">January</option><option value="2">February</option>
+      <option value="3">March</option><option value="4">April</option>
+      <option value="5">May</option><option value="6">June</option>
+      <option value="7">July</option><option value="8">August</option>
+      <option value="9">September</option><option value="10">October</option>
+      <option value="11">November</option><option value="12">December</option>
+    </select>
+    <input class="date-input" type="number" id="yearInput" placeholder="Year" min="2020" max="2099" style="max-width:100px;display:none"/>
+    <button class="load-btn" onclick="loadSales()">Load</button>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="summary-row" id="summaryRow">
+    <div class="sum-card"><div class="sum-label">Total Revenue</div><div class="sum-val green" id="sumRevenue">—</div></div>
+    <div class="sum-card"><div class="sum-label">Transactions</div><div class="sum-val" id="sumTxns">—</div></div>
+  </div>
+
+  <!-- SALES LIST -->
+  <div class="section-title" id="sectionTitle">Sales</div>
+  <div id="salesList"><div class="loading"><div class="spinner"></div><p>Loading…</p></div></div>
+</div>
+
+<script>
+'use strict';
+const today=new Date();
+const pad=n=>String(n).padStart(2,'0');
+const todayStr=`${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+
+// Init inputs
+document.getElementById('dateInput').value=todayStr;
+document.getElementById('monthSelect').value=today.getMonth()+1;
+document.getElementById('yearInput').value=today.getFullYear();
+
+function onPeriodChange(){
+  const p=document.getElementById('periodSelect').value;
+  document.getElementById('dateInput').style.display   = p==='daily'   ?'':'none';
+  document.getElementById('monthSelect').style.display = p==='monthly' ?'':'none';
+  document.getElementById('yearInput').style.display   = p!=='daily'   ?'':'none';
+  loadSales();
+}
+onPeriodChange(); // show correct inputs on load
+
+async function loadMe(){
+  try{const r=await fetch('/api/me');if(r.status===401){window.location.href='/login';return;}const d=await r.json();if(d.ok)document.getElementById('bizSub').textContent=d.user.business_name;}catch{}
+}
+
+async function loadSales(){
+  const period=document.getElementById('periodSelect').value;
+  const params=new URLSearchParams({period});
+  if(period==='daily')  params.set('date',  document.getElementById('dateInput').value||todayStr);
+  if(period==='monthly'||period==='yearly') params.set('year', document.getElementById('yearInput').value||today.getFullYear());
+  if(period==='monthly') params.set('month', document.getElementById('monthSelect').value||(today.getMonth()+1));
+
+  document.getElementById('salesList').innerHTML='<div class="loading"><div class="spinner"></div><p>Loading…</p></div>';
+
+  try{
+    const r=await fetch('/api/sales?'+params);
+    if(r.status===401){window.location.href='/login';return;}
+    const d=await r.json();
+    if(!d.ok)throw new Error(d.error);
+
+    // Summary
+    document.getElementById('sumRevenue').textContent='KES '+d.summary.total_revenue.toLocaleString();
+    document.getElementById('sumTxns').textContent=d.summary.total_transactions;
+
+    // Title
+    let label='Sales';
+    if(period==='daily')   label=`Sales on ${document.getElementById('dateInput').value}`;
+    if(period==='monthly') label=`Sales — ${['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][document.getElementById('monthSelect').value]} ${document.getElementById('yearInput').value}`;
+    if(period==='yearly')  label=`Sales — ${document.getElementById('yearInput').value}`;
+    document.getElementById('sectionTitle').textContent=label;
+
+    if(!d.sales.length){
+      document.getElementById('salesList').innerHTML='<div class="empty"><div class="icon">📭</div><p>No sales found for this period.</p></div>';
+      return;
+    }
+
+    document.getElementById('salesList').innerHTML=d.sales.map((s,i)=>{
+      const items=Array.isArray(s.items)?s.items.filter(x=>x&&x.name):[];
+      const dt=new Date(s.created_at);
+      const timeStr=dt.toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'});
+      const dateStr=dt.toLocaleDateString('en-GB');
+      return `
+      <div class="sale-card">
+        <div class="sale-header" onclick="toggleSale(${i})">
+          <div class="sale-left">
+            <div class="sale-txn">${s.txn_id}</div>
+            <div class="sale-customer">${s.customer}</div>
+            <div class="sale-time">${dateStr} · ${timeStr}</div>
+          </div>
+          <div class="sale-right">
+            <div class="sale-amount">KES ${parseInt(s.total_amount).toLocaleString()}</div>
+            <div class="sale-mpesa">${s.mpesa_code||''}</div>
+          </div>
+          <span class="sale-arrow" id="arrow-${i}">›</span>
+        </div>
+        <div class="sale-items" id="items-${i}">
+          ${items.map(it=>`
+            <div class="item-row">
+              <span><span class="item-name">${it.name}</span><span class="item-qty">×${it.qty}</span></span>
+              <span class="item-sub">KES ${parseInt(it.subtotal||0).toLocaleString()}</span>
+            </div>`).join('')}
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    document.getElementById('salesList').innerHTML=`<div class="empty"><div class="icon">⚠️</div><p>${e.message}</p></div>`;
+  }
+}
+
+function toggleSale(i){
+  const el=document.getElementById(`items-${i}`);
+  const ar=document.getElementById(`arrow-${i}`);
+  el.classList.toggle('show');ar.classList.toggle('open');
+}
+
+loadMe();loadSales();
+</script>
+</body>
+</html>
