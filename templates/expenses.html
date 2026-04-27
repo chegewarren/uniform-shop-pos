@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Expenses</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--navy:#0f1e3d;--gold:#f0a500;--gold2:#ffc93c;--green:#00c48c;--red:#ff4d6d;--bg:#080f20;--card:#111d38;--card2:#162040;--border:#1e2f52;--text:#e8edf8;--muted:#6b7fa8;--font:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;--topbar-h:60px;--safe-bottom:env(safe-area-inset-bottom,0px);}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100%;}
+.topbar{background:var(--navy);border-bottom:1px solid var(--border);padding:0 16px;height:var(--topbar-h);display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:200;}
+.topbar-left{display:flex;align-items:center;gap:12px;}
+.back-btn{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none;}
+.page-title{font-size:15px;font-weight:700;}
+.page-sub{font-size:10px;color:var(--muted);}
+.main{margin-top:var(--topbar-h);padding:20px 16px calc(24px + var(--safe-bottom));max-width:900px;margin-left:auto;margin-right:auto;}
+.page-tabs{display:flex;gap:8px;margin-bottom:20px;}
+.tab-link{padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;text-decoration:none;color:var(--muted);border:1px solid var(--border);background:var(--card);transition:all .2s;}
+.tab-link.active{background:var(--gold);color:var(--navy);border-color:var(--gold);}
+/* ADD EXPENSE CARD */
+.add-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:20px;}
+.add-title{font-size:14px;font-weight:700;margin-bottom:14px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.form-group{margin-bottom:12px;}
+.form-label{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:5px;display:block;}
+.form-input,.form-select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-family:var(--font);font-size:15px;outline:none;transition:border-color .2s;}
+.form-input:focus,.form-select:focus{border-color:var(--gold);}
+.form-input::placeholder{color:var(--muted);}
+.add-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);border:none;border-radius:10px;padding:12px 20px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;width:100%;}
+.add-btn:disabled{opacity:.5;cursor:not-allowed;}
+/* FILTER BAR */
+.filter-bar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:center;}
+.period-select{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;cursor:pointer;}
+.date-input{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:var(--font);font-size:14px;outline:none;flex:1;min-width:0;}
+.load-btn{background:var(--gold);color:var(--navy);border:none;border-radius:10px;padding:10px 18px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;}
+/* SUMMARY */
+.summary-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.sum-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;}
+.sum-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px;}
+.sum-val{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--gold);}
+.sum-val.red{color:var(--red);}
+/* EXPENSE LIST */
+.section-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;}
+.exp-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:14px;}
+.exp-icon{font-size:22px;flex-shrink:0;}
+.exp-info{flex:1;min-width:0;}
+.exp-desc{font-size:14px;font-weight:600;}
+.exp-cat{font-size:11px;color:var(--muted);margin-top:2px;}
+.exp-note{font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.exp-time{font-size:11px;color:var(--muted);margin-top:4px;}
+.exp-right{text-align:right;flex-shrink:0;}
+.exp-amount{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--red);}
+.exp-del{background:none;border:1px solid rgba(255,77,109,.3);border-radius:8px;color:var(--red);font-size:12px;cursor:pointer;padding:4px 10px;margin-top:6px;font-family:var(--font);}
+.exp-del:hover{background:rgba(255,77,109,.1);}
+.empty{text-align:center;padding:60px 20px;color:var(--muted);}
+.empty .icon{font-size:44px;margin-bottom:12px;}
+.empty p{font-size:14px;}
+.loading{text-align:center;padding:40px;color:var(--muted);}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:calc(20px + var(--safe-bottom));left:16px;right:16px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 18px;font-size:14px;text-align:center;transform:translateY(80px);opacity:0;transition:all .3s;z-index:2000;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.success{border-color:var(--green);}
+.toast.error{border-color:var(--red);}
+@media(min-width:700px){.main{padding:28px;}.summary-row{grid-template-columns:repeat(4,1fr);}.form-row{grid-template-columns:2fr 1fr 1fr;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-left">
+    <a class="back-btn" href="/">‹</a>
+    <div>
+      <div class="page-title">💸 Expenses</div>
+      <div class="page-sub" id="bizSub">Loading…</div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-tabs">
+    <a class="tab-link" href="/sales">Sales Records</a>
+    <a class="tab-link active" href="/expenses">Expenses</a>
+  </div>
+
+  <!-- ADD EXPENSE -->
+  <div class="add-card">
+    <div class="add-title">➕ Add Expense</div>
+    <div class="form-row">
+      <div class="form-group" style="grid-column:1/-1">
+        <label class="form-label">Description *</label>
+        <input class="form-input" id="expDesc" type="text" placeholder="e.g. Rent, Stock purchase, Transport…"/>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Amount (KES) *</label>
+        <input class="form-input" id="expAmount" type="number" placeholder="0" min="1"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-select" id="expCat">
+          <option>General</option>
+          <option>Rent</option>
+          <option>Stock / Inventory</option>
+          <option>Transport</option>
+          <option>Salaries</option>
+          <option>Utilities</option>
+          <option>Marketing</option>
+          <option>Equipment</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Note (optional)</label>
+      <input class="form-input" id="expNote" type="text" placeholder="Any extra details…"/>
+    </div>
+    <button class="add-btn" id="addBtn" onclick="addExpense()">Record Expense</button>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <select class="period-select" id="periodSelect" onchange="onPeriodChange()">
+      <option value="daily">Daily</option>
+      <option value="monthly">Monthly</option>
+      <option value="yearly">Yearly</option>
+    </select>
+    <input class="date-input" type="date" id="dateInput" style="display:none"/>
+    <select class="period-select" id="monthSelect" style="display:none">
+      <option value="1">January</option><option value="2">February</option>
+      <option value="3">March</option><option value="4">April</option>
+      <option value="5">May</option><option value="6">June</option>
+      <option value="7">July</option><option value="8">August</option>
+      <option value="9">September</option><option value="10">October</option>
+      <option value="11">November</option><option value="12">December</option>
+    </select>
+    <input class="date-input" type="number" id="yearInput" placeholder="Year" min="2020" max="2099" style="max-width:100px;display:none"/>
+    <button class="load-btn" onclick="loadExpenses()">Load</button>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="summary-row">
+    <div class="sum-card"><div class="sum-label">Total Spent</div><div class="sum-val red" id="sumTotal">—</div></div>
+    <div class="sum-card"><div class="sum-label">Entries</div><div class="sum-val" id="sumCount">—</div></div>
+  </div>
+
+  <!-- LIST -->
+  <div class="section-title" id="sectionTitle">Expenses</div>
+  <div id="expList"><div class="loading"><div class="spinner"></div><p>Loading…</p></div></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+const catEmoji={'Rent':'🏠','Stock / Inventory':'📦','Transport':'🚗','Salaries':'👤','Utilities':'💡','Marketing':'📣','Equipment':'🔧','General':'💸','Other':'📝'};
+const today=new Date();
+const pad=n=>String(n).padStart(2,'0');
+const todayStr=`${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+document.getElementById('dateInput').value=todayStr;
+document.getElementById('monthSelect').value=today.getMonth()+1;
+document.getElementById('yearInput').value=today.getFullYear();
+
+function onPeriodChange(){
+  const p=document.getElementById('periodSelect').value;
+  document.getElementById('dateInput').style.display   = p==='daily'   ?'':'none';
+  document.getElementById('monthSelect').style.display = p==='monthly' ?'':'none';
+  document.getElementById('yearInput').style.display   = p!=='daily'   ?'':'none';
+  loadExpenses();
+}
+onPeriodChange();
+
+async function loadMe(){try{const r=await fetch('/api/me');if(r.status===401){window.location.href='/login';return;}const d=await r.json();if(d.ok)document.getElementById('bizSub').textContent=d.user.business_name;}catch{}}
+
+async function loadExpenses(){
+  const period=document.getElementById('periodSelect').value;
+  const params=new URLSearchParams({period});
+  if(period==='daily')   params.set('date',  document.getElementById('dateInput').value||todayStr);
+  if(period!=='daily')   params.set('year',  document.getElementById('yearInput').value||today.getFullYear());
+  if(period==='monthly') params.set('month', document.getElementById('monthSelect').value||(today.getMonth()+1));
+  document.getElementById('expList').innerHTML='<div class="loading"><div class="spinner"></div><p>Loading…</p></div>';
+  try{
+    const r=await fetch('/api/expenses?'+params);
+    if(r.status===401){window.location.href='/login';return;}
+    const d=await r.json();
+    if(!d.ok)throw new Error(d.error);
+    document.getElementById('sumTotal').textContent='KES '+d.summary.total.toLocaleString();
+    document.getElementById('sumCount').textContent=d.summary.count;
+
+    let label='Expenses';
+    if(period==='daily')   label=`Expenses on ${document.getElementById('dateInput').value}`;
+    if(period==='monthly') label=`Expenses — ${['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][document.getElementById('monthSelect').value]} ${document.getElementById('yearInput').value}`;
+    if(period==='yearly')  label=`Expenses — ${document.getElementById('yearInput').value}`;
+    document.getElementById('sectionTitle').textContent=label;
+
+    if(!d.expenses.length){document.getElementById('expList').innerHTML='<div class="empty"><div class="icon">📭</div><p>No expenses found for this period.</p></div>';return;}
+
+    document.getElementById('expList').innerHTML=d.expenses.map(e=>{
+      const dt=new Date(e.created_at);
+      const timeStr=dt.toLocaleDateString('en-GB')+' · '+dt.toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'});
+      return `<div class="exp-card" id="exp-${e.id}">
+        <div class="exp-icon">${catEmoji[e.category]||'💸'}</div>
+        <div class="exp-info">
+          <div class="exp-desc">${e.description}</div>
+          <div class="exp-cat">${e.category}</div>
+          ${e.note?`<div class="exp-note">${e.note}</div>`:''}
+          <div class="exp-time">${timeStr}</div>
+        </div>
+        <div class="exp-right">
+          <div class="exp-amount">−KES ${parseInt(e.amount).toLocaleString()}</div>
+          <button class="exp-del" onclick="deleteExpense(${e.id})">Delete</button>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(err){document.getElementById('expList').innerHTML=`<div class="empty"><div class="icon">⚠️</div><p>${err.message}</p></div>`;}
+}
+
+async function addExpense(){
+  const desc  =document.getElementById('expDesc').value.trim();
+  const amount=parseInt(document.getElementById('expAmount').value)||0;
+  const cat   =document.getElementById('expCat').value;
+  const note  =document.getElementById('expNote').value.trim();
+  if(!desc)   {showToast('Please enter a description','error');return;}
+  if(amount<=0){showToast('Please enter a valid amount','error');return;}
+  const btn=document.getElementById('addBtn');
+  btn.disabled=true;btn.textContent='Saving…';
+  try{
+    const r=await fetch('/api/expenses',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({description:desc,amount,category:cat,note})});
+    const d=await r.json();
+    if(!d.ok)throw new Error(d.error);
+    document.getElementById('expDesc').value='';
+    document.getElementById('expAmount').value='';
+    document.getElementById('expNote').value='';
+    showToast('Expense recorded ✓','success');
+    loadExpenses();
+  }catch(e){showToast(e.message,'error');}
+  btn.disabled=false;btn.textContent='Record Expense';
+}
+
+async function deleteExpense(id){
+  if(!confirm('Delete this expense?'))return;
+  try{
+    await fetch(`/api/expenses/${id}`,{method:'DELETE'});
+    document.getElementById(`exp-${id}`)?.remove();
+    showToast('Deleted','success');
+    loadExpenses();
+  }catch(e){showToast('Delete failed','error');}
+}
+
+function showToast(msg,type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;setTimeout(()=>t.classList.remove('show'),3000);}
+
+loadMe();loadExpenses();
+</script>
+</body>
+</html>
