@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Inventory</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{--navy:#0f1e3d;--gold:#f0a500;--gold2:#ffc93c;--green:#00c48c;--red:#ff4d6d;--bg:#080f20;--card:#111d38;--card2:#162040;--border:#1e2f52;--text:#e8edf8;--muted:#6b7fa8;--font:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;--h:60px;--sb:env(safe-area-inset-bottom,0px);}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100%;}
+.topbar{background:var(--navy);border-bottom:1px solid var(--border);padding:0 16px;height:var(--h);display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:200;}
+.tl{display:flex;align-items:center;gap:12px;}
+.back{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:20px;display:flex;align-items:center;justify-content:center;text-decoration:none;}
+.pt{font-size:15px;font-weight:700;}.ps{font-size:10px;color:var(--muted);}
+.tr{display:flex;gap:8px;}
+.ib{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.ib:hover{border-color:var(--gold);color:var(--gold);}
+.main{margin-top:var(--h);padding:18px 16px calc(24px + var(--sb));max-width:980px;margin-left:auto;margin-right:auto;}
+.stats-row{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:18px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:13px 14px;}
+.stat-lbl{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;}
+.stat-val{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--gold);}
+.stat-val.g{color:var(--green);}.stat-val.r{color:var(--red);}
+.toolbar{display:flex;gap:10px;margin-bottom:14px;align-items:center;}
+.search-box{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 13px;flex:1;}
+.search-box input{background:none;border:none;outline:none;color:var(--text);font-family:var(--font);font-size:15px;width:100%;}
+.add-btn{background:var(--gold);color:var(--navy);border:none;border-radius:10px;padding:9px 14px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;}
+/* TABLE */
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.t-header{display:grid;grid-template-columns:2fr 80px 80px 70px 70px 80px;padding:11px 15px;border-bottom:1px solid var(--border);font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;}
+.p-row{display:grid;grid-template-columns:2fr 80px 80px 70px 70px 80px;padding:13px 15px;border-bottom:1px solid var(--border);align-items:center;transition:background .15s;}
+.p-row:last-child{border-bottom:none;}
+.p-row:hover{background:var(--card2);}
+.pr-name{font-weight:600;font-size:13px;}
+.pr-cat{font-size:11px;color:var(--muted);margin-top:1px;}
+.pr-bc{font-family:var(--mono);font-size:10px;color:var(--muted);}
+.pr-price{font-family:var(--mono);font-size:12px;color:var(--gold);}
+.pr-stock{font-family:var(--mono);font-size:13px;font-weight:700;}
+.ok{color:var(--green);}.low{color:var(--gold);}.out{color:var(--red);}
+.pr-act{display:flex;gap:5px;}
+.be{background:none;border:1px solid var(--border);border-radius:7px;color:var(--text);font-size:11px;padding:4px 8px;cursor:pointer;font-family:var(--font);}
+.be:hover{border-color:var(--gold);color:var(--gold);}
+.bd{background:none;border:1px solid rgba(255,77,109,.3);border-radius:7px;color:var(--red);font-size:11px;padding:4px 8px;cursor:pointer;font-family:var(--font);}
+/* MOBILE CARDS */
+.mob-list{display:none;}
+.prod-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:13px 14px;margin-bottom:9px;}
+.pc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.pc-name{font-weight:700;font-size:14px;}
+.pc-cat{font-size:11px;color:var(--muted);margin-top:1px;}
+.pc-price{font-family:var(--mono);font-size:15px;color:var(--gold);font-weight:700;}
+.pc-stats{display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap;}
+.pc-stat{font-size:11px;color:var(--muted);}
+.pc-stat span{font-family:var(--mono);font-weight:700;font-size:13px;display:block;margin-top:1px;}
+.pc-act{display:flex;gap:7px;}
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:1000;align-items:flex-end;justify-content:center;}
+.overlay.show{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:22px 22px 0 0;padding:26px 22px calc(26px + var(--sb));width:100%;max-width:520px;animation:up .3s ease;max-height:90vh;overflow-y:auto;}
+@keyframes up{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:16px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fg{margin-bottom:12px;}
+.fl{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:4px;display:block;}
+.fi,.fsel{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:11px 13px;color:var(--text);font-family:var(--font);font-size:16px;outline:none;transition:border-color .2s;}
+.fi:focus,.fsel:focus{border-color:var(--gold);}
+.fi::placeholder{color:var(--muted);}
+.section-label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin:14px 0 10px;border-top:1px solid var(--border);padding-top:12px;}
+.checkbox-row{display:flex;align-items:center;gap:10px;padding:10px 0;}
+.checkbox-row input{width:18px;height:18px;cursor:pointer;}
+.checkbox-row label{font-size:13px;color:var(--text);cursor:pointer;}
+.modal-btns{display:flex;gap:10px;margin-top:6px;}
+.btn-cancel{flex:1;padding:12px;border:1px solid var(--border);border-radius:11px;background:none;color:var(--text);font-family:var(--font);font-size:14px;cursor:pointer;}
+.btn-save{flex:2;padding:12px;border:none;border-radius:11px;background:var(--gold);color:var(--navy);font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;}
+.toast{position:fixed;bottom:calc(20px + var(--sb));left:16px;right:16px;background:var(--card);border:1px solid var(--green);border-radius:13px;padding:13px 16px;font-size:14px;text-align:center;transform:translateY(80px);opacity:0;transition:all .3s;z-index:2000;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.error{border-color:var(--red);}
+.empty{text-align:center;padding:50px 20px;color:var(--muted);}
+.loading{text-align:center;padding:40px;color:var(--muted);}
+.spinner{width:30px;height:30px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 10px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.print-header{display:none;text-align:center;margin-bottom:16px;}
+@media print{body{background:#fff;color:#000;}.topbar,.toolbar,.tr,.ib,.pr-act,.pc-act,.overlay{display:none!important;}.main{margin-top:0;padding:16px;}.print-header{display:block!important;}.table-wrap{border:1px solid #ccc;}.p-row{border-bottom:1px solid #eee;}.pr-price,.pr-stock{color:#000;}}
+@media(max-width:699px){.table-wrap{display:none;}.mob-list{display:block;}.stats-row{grid-template-columns:1fr 1fr;}}
+@media(min-width:700px){.main{padding:26px;}.stats-row{grid-template-columns:repeat(4,1fr);}.overlay{align-items:center;}.modal{border-radius:22px;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="tl">
+    <a class="back" href="/">‹</a>
+    <div><div class="pt">📦 Inventory</div><div class="ps" id="bizSub">—</div></div>
+  </div>
+  <div class="tr">
+    <button class="ib" onclick="printPage()" title="Print">🖨️</button>
+    <button class="ib" onclick="downloadPDF()" title="PDF">⬇️</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="print-header" id="ph"><h2 id="phBiz">Inventory</h2><p id="phD">—</p></div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-lbl">Total Products</div><div class="stat-val" id="sTotal">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">In Stock</div><div class="stat-val g" id="sIn">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">Low Stock</div><div class="stat-val" style="color:var(--gold)" id="sLow">—</div></div>
+    <div class="stat-card"><div class="stat-lbl">Out of Stock</div><div class="stat-val r" id="sOut">—</div></div>
+  </div>
+  <div class="toolbar">
+    <div class="search-box"><span style="color:var(--muted)">🔍</span><input type="text" id="searchIn" placeholder="Search products or barcode…" oninput="filterList()"/></div>
+    <button class="add-btn" onclick="openModal()">+ Add Product</button>
+  </div>
+  <div class="table-wrap">
+    <div class="t-header"><span>Product</span><span>Price</span><span>Wholesale</span><span>Stock</span><span>Reorder</span><span>Actions</span></div>
+    <div id="prodTable"></div>
+  </div>
+  <div class="mob-list" id="prodCards"></div>
+</div>
+
+<!-- Add/Edit Modal -->
+<div class="overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">Add Product</div>
+    <!-- Basic -->
+    <div class="fg"><label class="fl">Product Name *</label><input class="fi" id="fName" type="text" placeholder="e.g. White Shirt Size 12"/></div>
+    <div class="form-row">
+      <div class="fg"><label class="fl">Category</label>
+        <select class="fsel" id="fCat">
+          <option>Tops</option><option>Bottoms</option><option>Outerwear</option>
+          <option>Sportswear</option><option>Footwear</option><option>Accessories</option><option>General</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">Barcode (optional)</label><input class="fi" id="fBarcode" type="text" placeholder="Scan or type barcode"/></div>
+    </div>
+    <!-- Prices -->
+    <div class="section-label">💰 Pricing</div>
+    <div class="form-row">
+      <div class="fg"><label class="fl">Retail Price (KES) *</label><input class="fi" id="fPrice" type="number" placeholder="0" min="0"/></div>
+      <div class="fg"><label class="fl">Wholesale Price</label><input class="fi" id="fWholesale" type="number" placeholder="0" min="0"/></div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label class="fl">Bulk / School Price</label><input class="fi" id="fBulk" type="number" placeholder="0" min="0"/></div>
+      <div class="fg"><label class="fl">Discount %</label><input class="fi" id="fDiscPct" type="number" placeholder="0" min="0" max="100"/></div>
+    </div>
+    <div class="form-row">
+      <div class="fg"><label class="fl">Fixed Discount (KES)</label><input class="fi" id="fDiscFixed" type="number" placeholder="0" min="0"/></div>
+    </div>
+    <!-- Stock -->
+    <div class="section-label">📦 Stock</div>
+    <div class="form-row">
+      <div class="fg"><label class="fl">Stock Quantity *</label><input class="fi" id="fStock" type="number" placeholder="0" min="0"/></div>
+      <div class="fg"><label class="fl">Reorder Level</label><input class="fi" id="fReorder" type="number" placeholder="5" min="0"/></div>
+    </div>
+    <!-- VAT -->
+    <div class="section-label">🧾 Tax</div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="fVatExempt"/>
+      <label for="fVatExempt">VAT Exempt (this product is 0% VAT)</label>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" id="saveBtn" onclick="saveProduct()">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+let products=[], editingId=null, bizName='';
+const emojiMap={Tops:'👕',Bottoms:'👖',Outerwear:'🧥',Sportswear:'🩳',Footwear:'👟',Accessories:'🎒',General:'📦'};
+const sc=p=>p.stock<=0?'out':p.stock<=p.reorder?'low':'ok';
+const scLabel=p=>p.stock<=0?'Out':p.stock<=p.reorder?'Low':'Good';
+
+async function loadMe(){try{const r=await fetch('/api/me');if(r.status===401){window.location.href='/login';return;}const d=await r.json();if(d.ok){bizName=d.user.business_name;document.getElementById('bizSub').textContent=bizName;document.getElementById('phBiz').textContent=bizName+' — Inventory';}}catch{}}
+
+async function loadProducts(){
+  try{
+    const r=await fetch('/api/products');if(r.status===401){window.location.href='/login';return;}
+    const d=await r.json();if(!d.ok)throw new Error(d.error);
+    products=d.products;updateStats();renderAll(products);
+    document.getElementById('phD').textContent='Printed: '+new Date().toLocaleString('en-KE');
+  }catch(e){document.getElementById('prodTable').innerHTML=`<div class="empty"><div class="icon">⚠️</div><p>${e.message}</p></div>`;}
+}
+
+function updateStats(){
+  const total=products.length,out=products.filter(p=>p.stock<=0).length,low=products.filter(p=>p.stock>0&&p.stock<=p.reorder).length;
+  document.getElementById('sTotal').textContent=total;
+  document.getElementById('sIn').textContent=total-out;
+  document.getElementById('sLow').textContent=low;
+  document.getElementById('sOut').textContent=out;
+}
+
+function renderAll(list){
+  document.getElementById('prodTable').innerHTML=list.length?list.map(p=>`
+    <div class="p-row">
+      <div>
+        <div class="pr-name">${emojiMap[p.category]||'📦'} ${p.name}</div>
+        <div class="pr-cat">${p.category}${p.barcode?` · ${p.barcode}`:''}</div>
+        ${p.discount_pct>0?`<div class="pr-cat" style="color:var(--green)">−${p.discount_pct}% off</div>`:''}
+      </div>
+      <div>
+        <div class="pr-price">KES ${parseInt(p.price).toLocaleString()}</div>
+        ${p.wholesale_price>0?`<div class="pr-bc">WS: ${parseInt(p.wholesale_price).toLocaleString()}</div>`:''}
+      </div>
+      <div>
+        ${p.bulk_price>0?`<div class="pr-price" style="color:var(--green)">KES ${parseInt(p.bulk_price).toLocaleString()}</div>`:'<div class="pr-bc">—</div>'}
+      </div>
+      <div class="pr-stock ${sc(p)}">${p.stock}</div>
+      <div class="pr-stock" style="color:var(--muted)">${p.reorder}</div>
+      <div class="pr-act">
+        <button class="be" onclick="openEdit(${p.id})">Edit</button>
+        <button class="bd" onclick="deleteProduct(${p.id})">Del</button>
+      </div>
+    </div>`).join(''):'<div class="empty"><div class="icon">📦</div><p>No products yet.</p></div>';
+
+  document.getElementById('prodCards').innerHTML=list.length?list.map(p=>`
+    <div class="prod-card">
+      <div class="pc-top">
+        <div><div class="pc-name">${emojiMap[p.category]||'📦'} ${p.name}</div><div class="pc-cat">${p.category}${p.barcode?' · '+p.barcode:''}</div></div>
+        <div class="pc-price">KES ${parseInt(p.price).toLocaleString()}</div>
+      </div>
+      <div class="pc-stats">
+        <div class="pc-stat">Stock<span class="${sc(p)}">${p.stock}</span></div>
+        <div class="pc-stat">Reorder<span>${p.reorder}</span></div>
+        ${p.wholesale_price>0?`<div class="pc-stat">Wholesale<span style="color:var(--gold)">KES ${parseInt(p.wholesale_price).toLocaleString()}</span></div>`:''}
+        ${p.bulk_price>0?`<div class="pc-stat">Bulk<span style="color:var(--green)">KES ${parseInt(p.bulk_price).toLocaleString()}</span></div>`:''}
+        ${p.discount_pct>0?`<div class="pc-stat">Discount<span style="color:var(--green)">${p.discount_pct}%</span></div>`:''}
+        <div class="pc-stat">VAT<span>${p.vat_exempt?'Exempt':'16%'}</span></div>
+        <div class="pc-stat">Status<span class="${sc(p)}">${scLabel(p)}</span></div>
+      </div>
+      <div class="pc-act">
+        <button class="be" onclick="openEdit(${p.id})">✏️ Edit</button>
+        <button class="bd" onclick="deleteProduct(${p.id})">🗑️ Delete</button>
+      </div>
+    </div>`).join(''):'<div class="empty"><div class="icon">📦</div><p>No products yet.</p></div>';
+}
+
+function filterList(){const q=document.getElementById('searchIn').value.toLowerCase();renderAll(products.filter(p=>p.name.toLowerCase().includes(q)||p.category.toLowerCase().includes(q)||(p.barcode||'').toLowerCase().includes(q)));}
+
+function openModal(){
+  editingId=null;document.getElementById('modalTitle').textContent='Add Product';
+  ['fName','fBarcode','fPrice','fWholesale','fBulk','fDiscPct','fDiscFixed','fStock'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fReorder').value='5';document.getElementById('fVatExempt').checked=false;
+  document.getElementById('modalOverlay').classList.add('show');
+  setTimeout(()=>document.getElementById('fName').focus(),100);
+}
+function openEdit(id){
+  const p=products.find(x=>x.id===id);if(!p)return;
+  editingId=id;document.getElementById('modalTitle').textContent='Edit Product';
+  document.getElementById('fName').value=p.name;document.getElementById('fCat').value=p.category;
+  document.getElementById('fBarcode').value=p.barcode||'';document.getElementById('fPrice').value=p.price;
+  document.getElementById('fWholesale').value=p.wholesale_price||'';document.getElementById('fBulk').value=p.bulk_price||'';
+  document.getElementById('fDiscPct').value=p.discount_pct||'';document.getElementById('fDiscFixed').value=p.discount_fixed||'';
+  document.getElementById('fStock').value=p.stock;document.getElementById('fReorder').value=p.reorder;
+  document.getElementById('fVatExempt').checked=p.vat_exempt||false;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('show');}
+
+async function saveProduct(){
+  const name=document.getElementById('fName').value.trim();
+  const price=parseInt(document.getElementById('fPrice').value)||0;
+  const stock=parseInt(document.getElementById('fStock').value)||0;
+  if(!name){showToast('Product name is required','error');return;}
+  if(price<=0){showToast('Please enter a valid price','error');return;}
+  const btn=document.getElementById('saveBtn');btn.disabled=true;btn.textContent='Saving…';
+  const payload={
+    name,category:document.getElementById('fCat').value,
+    barcode:document.getElementById('fBarcode').value.trim(),
+    price,wholesale_price:parseInt(document.getElementById('fWholesale').value)||0,
+    bulk_price:parseInt(document.getElementById('fBulk').value)||0,
+    discount_pct:parseInt(document.getElementById('fDiscPct').value)||0,
+    discount_fixed:parseInt(document.getElementById('fDiscFixed').value)||0,
+    stock,reorder:parseInt(document.getElementById('fReorder').value)||5,
+    vat_exempt:document.getElementById('fVatExempt').checked,
+  };
+  try{
+    const r=await fetch(editingId?`/api/products/${editingId}`:'/api/products',{method:editingId?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const d=await r.json();if(!d.ok)throw new Error(d.error);
+    closeModal();showToast(editingId?'Updated ✓':'Product added ✓');loadProducts();
+  }catch(e){showToast(e.message,'error');}
+  btn.disabled=false;btn.textContent='Save Product';
+}
+
+async function deleteProduct(id){
+  if(!confirm('Delete this product?'))return;
+  try{await fetch(`/api/products/${id}`,{method:'DELETE'});showToast('Deleted');loadProducts();}
+  catch{showToast('Delete failed','error');}
+}
+
+function printPage(){document.getElementById('ph').style.display='block';window.print();setTimeout(()=>document.getElementById('ph').style.display='none',500);}
+
+function downloadPDF(){
+  if(!products.length){showToast('No products','error');return;}
+  const {jsPDF}=window.jspdf;const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+  doc.setFillColor(15,30,61);doc.rect(0,0,297,22,'F');
+  doc.setTextColor(240,165,0);doc.setFontSize(14);doc.setFont('helvetica','bold');doc.text((bizName||'Uniform Shop')+' — Inventory',14,10);
+  doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(200,210,230);doc.text('Generated: '+new Date().toLocaleString('en-KE'),283,10,{align:'right'});
+  doc.text(`${products.length} products · ${products.filter(p=>p.stock<=0).length} out · ${products.filter(p=>p.stock>0&&p.stock<=p.reorder).length} low`,14,16);
+  doc.autoTable({startY:26,head:[['Product','Category','Barcode','Retail','Wholesale','Bulk','Stock','Reorder','Discount','VAT','Status']],
+    body:products.map(p=>[p.name,p.category,p.barcode||'—','KES '+parseInt(p.price).toLocaleString(),p.wholesale_price>0?'KES '+parseInt(p.wholesale_price).toLocaleString():'—',p.bulk_price>0?'KES '+parseInt(p.bulk_price).toLocaleString():'—',p.stock,p.reorder,p.discount_pct>0?p.discount_pct+'%':p.discount_fixed>0?'KES '+p.discount_fixed:'—',p.vat_exempt?'Exempt':'16%',p.stock<=0?'OUT':p.stock<=p.reorder?'LOW':'OK']),
+    styles:{fontSize:7.5,cellPadding:2.5,fillColor:[17,29,56],textColor:[232,237,248]},headStyles:{fillColor:[15,30,61],textColor:[240,165,0],fontStyle:'bold'},alternateRowStyles:{fillColor:[22,32,64]},
+    didParseCell(d){if(d.column.index===10&&d.section==='body'){const v=d.cell.raw;d.cell.styles.textColor=v==='OUT'?[255,77,109]:v==='LOW'?[240,165,0]:[0,196,140];}},margin:{left:14,right:14}});
+  const pc=doc.internal.getNumberOfPages();for(let i=1;i<=pc;i++){doc.setPage(i);doc.setFontSize(7);doc.setTextColor(107,127,168);doc.text(`Page ${i}/${pc}`,283,doc.internal.pageSize.height-6,{align:'right'});doc.text(bizName+' · Confidential',14,doc.internal.pageSize.height-6);}
+  doc.save('inventory.pdf');showToast('PDF downloaded ✓');
+}
+
+function showToast(msg,type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;setTimeout(()=>t.classList.remove('show'),3000);}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+loadMe();loadProducts();
+</script>
+</body>
+</html>
