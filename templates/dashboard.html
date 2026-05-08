@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<style>
+:root{--navy:#0f1e3d;--gold:#f0a500;--gold2:#ffc93c;--green:#00c48c;--red:#ff4d6d;--bg:#080f20;--card:#111d38;--card2:#162040;--border:#1e2f52;--text:#e8edf8;--muted:#6b7fa8;--font:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;--h:60px;--sb:env(safe-area-inset-bottom,0px);}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100%;}
+.topbar{background:var(--navy);border-bottom:1px solid var(--border);padding:0 16px;height:var(--h);display:flex;align-items:center;justify-content:space-between;position:fixed;top:0;left:0;right:0;z-index:200;}
+.tl{display:flex;align-items:center;gap:12px;}
+.back{width:36px;height:36px;border-radius:10px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:20px;display:flex;align-items:center;justify-content:center;text-decoration:none;}
+.pt{font-size:15px;font-weight:700;}.ps{font-size:10px;color:var(--muted);}
+.tr{display:flex;gap:8px;}
+.ib{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--card2);color:var(--text);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.ib:hover{border-color:var(--gold);color:var(--gold);}
+.ib.spinning{animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.main{margin-top:var(--h);padding:18px 16px calc(28px + var(--sb));max-width:980px;margin-left:auto;margin-right:auto;}
+.last-upd{font-size:11px;color:var(--muted);text-align:right;margin-bottom:14px;}
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:18px;}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;}
+.sc-icon{font-size:20px;margin-bottom:7px;}
+.sc-lbl{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;}
+.sc-val{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--gold);}
+.sc-val.g{color:var(--green);}.sc-val.r{color:var(--red);}.sc-val.w{color:var(--text);}
+.sc-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+/* PERIOD TABS */
+.period-tabs{display:flex;gap:6px;margin-bottom:14px;}
+.ptab{padding:6px 14px;border-radius:16px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:var(--card);color:var(--muted);transition:all .2s;}
+.ptab.active{background:var(--gold);color:var(--navy);border-color:var(--gold);}
+/* CHART */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:18px;}
+.chart-title{font-size:13px;font-weight:700;margin-bottom:12px;}
+.chart-wrap{height:150px;display:flex;align-items:flex-end;gap:5px;padding-bottom:22px;}
+.bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;}
+.bar-outer{flex:1;display:flex;align-items:flex-end;width:100%;}
+.bar{width:100%;background:linear-gradient(180deg,var(--gold),rgba(240,165,0,.3));border-radius:5px 5px 0 0;min-height:3px;transition:height .5s cubic-bezier(.34,1.56,.64,1);}
+.bar-lbl{font-size:8px;color:var(--muted);text-align:center;white-space:nowrap;}
+.bar-val{font-size:8px;color:var(--gold);font-family:var(--mono);text-align:center;}
+/* ALERTS */
+.alert-card{background:rgba(255,77,109,.07);border:1px solid rgba(255,77,109,.3);border-radius:14px;padding:14px;margin-bottom:18px;display:none;}
+.alert-card.show{display:block;}
+.alert-title{font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px;}
+.alert-item{font-size:13px;padding:4px 0;border-bottom:1px solid rgba(255,77,109,.15);}
+.alert-item:last-child{border-bottom:none;}
+.alert-item span{color:var(--red);font-family:var(--mono);}
+/* RECENT + TOP */
+.two-col{display:grid;grid-template-columns:1fr;gap:18px;margin-bottom:18px;}
+.sec-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;}
+.list-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.lr{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);}
+.lr:last-child{border-bottom:none;}
+.lr-txn{font-family:var(--mono);font-size:11px;color:var(--muted);}
+.lr-cust{font-size:13px;font-weight:600;margin:2px 0;}
+.lr-item{font-size:11px;color:var(--muted);}
+.lr-amt{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green);}
+.tp-rank{font-family:var(--mono);font-size:11px;color:var(--muted);width:18px;flex-shrink:0;}
+.tp-name{flex:1;font-size:13px;font-weight:600;margin:0 10px;}
+.tp-qty{font-family:var(--mono);font-size:12px;color:var(--gold);}
+.tp-rev{font-size:11px;color:var(--muted);}
+/* EOD */
+.eod-card{background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:18px;}
+.eod-title{font-size:14px;font-weight:700;margin-bottom:4px;}
+.eod-sub{font-size:12px;color:var(--muted);margin-bottom:14px;}
+.eod-btn{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--navy);border:none;border-radius:10px;padding:12px 20px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;}
+/* QUICK LINKS */
+.ql-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+.ql{padding:9px 16px;background:var(--card);border:1px solid var(--border);border-radius:11px;color:var(--text);text-decoration:none;font-size:13px;font-weight:600;}
+.empty{text-align:center;padding:28px;color:var(--muted);font-size:13px;}
+.loading{text-align:center;padding:50px;color:var(--muted);}
+.spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 10px;}
+.toast{position:fixed;bottom:calc(20px + var(--sb));left:16px;right:16px;background:var(--card);border:1px solid var(--green);border-radius:13px;padding:13px 16px;font-size:14px;text-align:center;transform:translateY(80px);opacity:0;transition:all .3s;z-index:2000;}
+.toast.show{transform:translateY(0);opacity:1;}
+.print-header{display:none;text-align:center;margin-bottom:16px;}
+@media print{body{background:#fff;color:#000;}.topbar,.ql-row,.eod-card,.tr,.ib,.period-tabs,.chart-card{display:none!important;}.main{margin-top:0;padding:16px;}.print-header{display:block!important;}.sc{border:1px solid #ccc;background:#f9f9f9;}.sc-val{color:#000;}.list-card{border:1px solid #ccc;}.lr-amt{color:#000;}}
+@media(min-width:700px){.main{padding:26px;}.stats-grid{grid-template-columns:repeat(3,1fr);}.two-col{grid-template-columns:1fr 1fr;}.chart-wrap{height:180px;}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="tl">
+    <a class="back" href="/">‹</a>
+    <div><div class="pt">📊 Dashboard</div><div class="ps" id="bizSub">—</div></div>
+  </div>
+  <div class="tr">
+    <button class="ib" id="refreshBtn" onclick="loadDashboard()" title="Refresh">🔄</button>
+    <button class="ib" onclick="printPage()" title="Print">🖨️</button>
+    <button class="ib" onclick="downloadPDF()" title="PDF">⬇️</button>
+  </div>
+</div>
+
+<div class="main">
+  <div class="print-header" id="ph"><h2 id="phBiz">Dashboard</h2><p id="phD">—</p></div>
+  <div class="last-upd" id="lastUpd">—</div>
+
+  <!-- Period tabs -->
+  <div class="period-tabs">
+    <button class="ptab active" onclick="setPeriod('daily',this)">Today</button>
+    <button class="ptab" onclick="setPeriod('weekly',this)">This Week</button>
+    <button class="ptab" onclick="setPeriod('monthly',this)">This Month</button>
+    <button class="ptab" onclick="setPeriod('yearly',this)">This Year</button>
+  </div>
+
+  <div id="mainContent"><div class="loading"><div class="spinner"></div><p>Loading dashboard…</p></div></div>
+
+  <!-- EOD -->
+  <div class="eod-card">
+    <div class="eod-title">🌙 End of Day Summary</div>
+    <div class="eod-sub">Generate closing report for today — total sales, expenses, net profit.</div>
+    <button class="eod-btn" onclick="generateEOD()">Generate EOD Report</button>
+  </div>
+
+  <!-- Quick links -->
+  <div class="ql-row">
+    <a class="ql" href="/">🏪 POS</a>
+    <a class="ql" href="/sales">📋 Sales</a>
+    <a class="ql" href="/expenses">💸 Expenses</a>
+    <a class="ql" href="/inventory">📦 Inventory</a>
+    <a class="ql" href="/customers">👥 Customers</a>
+    <a class="ql" href="/suppliers">🚚 Suppliers</a>
+    <a class="ql" href="/reports">📤 Reports</a>
+    <a class="ql" href="/team">👤 Team</a>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+let dashData=null, bizName='', currentPeriod='daily';
+const fmt=n=>parseInt(n||0).toLocaleString();
+
+async function loadMe(){
+  try{const r=await fetch('/api/me');if(r.status===401){window.location.href='/login';return;}
+  const d=await r.json();if(d.ok){bizName=d.user.business_name;document.getElementById('bizSub').textContent=bizName;document.getElementById('phBiz').textContent=bizName+' — Dashboard';}}catch{}
+}
+
+function setPeriod(p,btn){
+  currentPeriod=p;
+  document.querySelectorAll('.ptab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  loadDashboard();
+}
+
+async function loadDashboard(){
+  const btn=document.getElementById('refreshBtn');btn.classList.add('spinning');
+  try{
+    const r=await fetch(`/api/dashboard?period=${currentPeriod}`);
+    if(r.status===401){window.location.href='/login';return;}
+    const d=await r.json();if(!d.ok)throw new Error(d.error);
+    dashData=d.data;render(d.data);
+    const now=new Date().toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    document.getElementById('lastUpd').textContent='Last updated: '+now;
+    document.getElementById('phD').textContent='Generated: '+new Date().toLocaleString('en-KE');
+  }catch(e){document.getElementById('mainContent').innerHTML=`<div class="loading"><p style="font-size:36px;margin-bottom:10px">⚠️</p><p>${e.message}</p></div>`;}
+  btn.classList.remove('spinning');
+}
+
+function render(data){
+  const profit=data.net_profit||0;
+  const alertHtml=(data.low_stock>0||data.out_stock>0)?`
+    <div class="alert-card show">
+      <div class="alert-title">⚠️ Stock Alerts</div>
+      ${data.out_stock>0?`<div class="alert-item">Out of stock: <span>${data.out_stock} product${data.out_stock>1?'s':''}</span></div>`:''}
+      ${data.low_stock>0?`<div class="alert-item">Low stock: <span>${data.low_stock} product${data.low_stock>1?'s':''}</span></div>`:''}
+      <div style="margin-top:8px"><a href="/inventory" style="color:var(--gold);font-size:12px;font-weight:600;text-decoration:none">Go to Inventory →</a></div>
+    </div>`:''  ;
+
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const maxV=Math.max(...(data.chart_data||[]).map(d=>d.total||0),1);
+  const chartBars=(data.chart_data||[]).length?data.chart_data.map(d=>{
+    const dt=new Date(d.day),pct=Math.max(((d.total||0)/maxV)*100,3);
+    return `<div class="bar-col">
+      <div class="bar-val">${(d.total||0)>=1000?((d.total||0)/1000).toFixed(1)+'k':fmt(d.total)}</div>
+      <div class="bar-outer"><div class="bar" style="height:${pct}%"></div></div>
+      <div class="bar-lbl">${days[dt.getDay()]}</div>
+    </div>`;
+  }).join(''):'<div class="empty">No chart data yet</div>';
+
+  const recentHtml=(data.recent_sales||[]).length?(data.recent_sales||[]).map(s=>{
+    const dt=new Date(s.created_at);
+    return `<div class="lr">
+      <div>
+        <div class="lr-txn">${s.txn_id} · ${dt.toLocaleDateString('en-GB')} ${dt.toLocaleTimeString('en-KE',{hour:'2-digit',minute:'2-digit'})}</div>
+        <div class="lr-cust">${s.customer}</div>
+        <div class="lr-item">${s.item_name||'—'}</div>
+      </div>
+      <div class="lr-amt">KES ${fmt(s.total_amount)}</div>
+    </div>`;
+  }).join(''):'<div class="empty">No sales yet</div>';
+
+  const topHtml=(data.top_products||[]).length?(data.top_products||[]).map((p,i)=>`
+    <div class="lr">
+      <div class="tp-rank">#${i+1}</div>
+      <div class="tp-name">${p.name}</div>
+      <div style="text-align:right">
+        <div class="tp-qty">${p.total_qty} sold</div>
+        <div class="tp-rev">KES ${fmt(p.total_rev)}</div>
+      </div>
+    </div>`).join(''):'<div class="empty">No sales data yet</div>';
+
+  const periodLabel={daily:'Today',weekly:'This Week',monthly:'This Month',yearly:'This Year'}[currentPeriod]||'Period';
+
+  document.getElementById('mainContent').innerHTML=`
+    ${alertHtml}
+    <div class="stats-grid">
+      <div class="sc"><div class="sc-icon">💰</div><div class="sc-lbl">${periodLabel} Revenue</div><div class="sc-val g">KES ${fmt(data.revenue)}</div><div class="sc-sub">${data.txn_count||0} transactions</div></div>
+      <div class="sc"><div class="sc-icon">💸</div><div class="sc-lbl">${periodLabel} Expenses</div><div class="sc-val r">KES ${fmt(data.expenses)}</div></div>
+      <div class="sc"><div class="sc-icon">📈</div><div class="sc-lbl">Net Profit</div><div class="sc-val ${profit>=0?'g':'r'}">KES ${fmt(profit)}</div></div>
+      <div class="sc"><div class="sc-icon">🧾</div><div class="sc-lbl">VAT Collected</div><div class="sc-val">KES ${fmt(data.vat_collected)}</div></div>
+      <div class="sc"><div class="sc-icon">📦</div><div class="sc-lbl">Total Products</div><div class="sc-val w">${data.total_products||0}</div></div>
+      <div class="sc"><div class="sc-icon">👥</div><div class="sc-lbl">Total Customers</div><div class="sc-val w">${data.total_customers||0}</div><div class="sc-sub"><a href="/customers" style="color:var(--gold);font-size:11px">View all</a></div></div>
+    </div>
+    <div class="chart-card"><div class="chart-title">📈 Revenue Trend</div><div class="chart-wrap">${chartBars}</div></div>
+    <div class="two-col">
+      <div><div class="sec-title">🕐 Recent Sales</div><div class="list-card">${recentHtml}</div></div>
+      <div><div class="sec-title">🏆 Top Products</div><div class="list-card">${topHtml}</div></div>
+    </div>`;
+}
+
+async function generateEOD(){
+  try{
+    const r=await fetch('/api/eod-report',{method:'POST',headers:{'Content-Type':'application/json'}});
+    const d=await r.json();
+    if(!d.ok)throw new Error(d.error);
+    // Download EOD PDF
+    const data=d.report;
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({unit:'mm',format:'a4'});
+    doc.setFillColor(15,30,61);doc.rect(0,0,210,28,'F');
+    doc.setTextColor(240,165,0);doc.setFontSize(16);doc.setFont('helvetica','bold');doc.text(bizName,14,11);
+    doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(200,210,230);doc.text('End of Day Report',14,18);doc.text(new Date().toLocaleDateString('en-KE'),14,24);
+    const kpis=[['Total Sales','KES '+fmt(data.total_sales)],['Total Transactions',String(data.total_txns)],['Total Expenses','KES '+fmt(data.total_expenses)],['Net Profit','KES '+fmt(data.net_profit)],['VAT Collected','KES '+fmt(data.vat_collected)],['Discounts Given','KES '+fmt(data.discounts_given)]];
+    kpis.forEach(([l,v],i)=>{
+      const x=14+(i%3)*65,y=32+Math.floor(i/3)*20;
+      doc.setFillColor(17,29,56);doc.roundedRect(x,y,61,16,2,2,'F');
+      doc.setTextColor(107,127,168);doc.setFontSize(7);doc.text(l,x+3,y+5);
+      doc.setTextColor(240,165,0);doc.setFontSize(11);doc.setFont('helvetica','bold');doc.text(v,x+3,y+13);
+    });
+    if(data.recent_sales?.length){
+      doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(232,237,248);doc.text('Sales Today',14,78);
+      doc.autoTable({startY:82,head:[['TXN','Customer','Amount','M-Pesa']],body:(data.recent_sales||[]).map(s=>['TXN-'+String(s.id).padStart(4,'0'),s.customer,'KES '+fmt(s.total_amount),s.mpesa_code||'—']),styles:{fontSize:8,cellPadding:2.5,fillColor:[17,29,56],textColor:[232,237,248]},headStyles:{fillColor:[15,30,61],textColor:[240,165,0],fontStyle:'bold'},alternateRowStyles:{fillColor:[22,32,64]},margin:{left:14,right:14}});
+    }
+    doc.save(`eod-report-${new Date().toISOString().split('T')[0]}.pdf`);
+
+    // WhatsApp summary
+    const msg=encodeURIComponent(`📊 *${bizName} — EOD Report ${new Date().toLocaleDateString('en-KE')}*\n\n💰 Revenue: KES ${fmt(data.total_sales)}\n📋 Transactions: ${data.total_txns}\n💸 Expenses: KES ${fmt(data.total_expenses)}\n📈 Net Profit: KES ${fmt(data.net_profit)}\n🧾 VAT: KES ${fmt(data.vat_collected)}`);
+    document.getElementById('mainContent').insertAdjacentHTML('afterbegin',`<div style="background:rgba(0,196,140,.1);border:1px solid var(--green);border-radius:12px;padding:14px;margin-bottom:16px;font-size:13px">✅ EOD Report generated! <a href="https://wa.me/?text=${msg}" target="_blank" style="color:var(--gold);font-weight:600">Share on WhatsApp →</a></div>`);
+    showToast('EOD report downloaded ✓');
+  }catch(e){showToast(e.message,'error');}
+}
+
+function printPage(){document.getElementById('ph').style.display='block';window.print();setTimeout(()=>document.getElementById('ph').style.display='none',500);}
+
+function downloadPDF(){
+  if(!dashData)return;
+  const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});
+  const d=dashData;
+  doc.setFillColor(15,30,61);doc.rect(0,0,210,28,'F');
+  doc.setTextColor(240,165,0);doc.setFontSize(16);doc.setFont('helvetica','bold');doc.text(bizName||'Dashboard',14,11);
+  doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(200,210,230);doc.text('Dashboard Report',14,18);doc.text(new Date().toLocaleString('en-KE'),196,18,{align:'right'});
+  const kpis=[['Revenue','KES '+fmt(d.revenue)],['Expenses','KES '+fmt(d.expenses)],['Net Profit','KES '+fmt(d.net_profit)],['VAT','KES '+fmt(d.vat_collected)],['Products',String(d.total_products||0)],['Customers',String(d.total_customers||0)]];
+  kpis.forEach(([l,v],i)=>{
+    const x=14+(i%3)*65,y=32+Math.floor(i/3)*20;
+    doc.setFillColor(17,29,56);doc.roundedRect(x,y,61,16,2,2,'F');
+    doc.setTextColor(107,127,168);doc.setFontSize(7);doc.text(l,x+3,y+5);
+    doc.setTextColor(240,165,0);doc.setFontSize(11);doc.setFont('helvetica','bold');doc.text(v,x+3,y+13);
+  });
+  if((d.recent_sales||[]).length){
+    doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(232,237,248);doc.text('Recent Sales',14,78);
+    doc.autoTable({startY:82,head:[['TXN','Date','Customer','Amount']],body:d.recent_sales.map(s=>[s.txn_id,new Date(s.created_at).toLocaleDateString('en-GB'),s.customer,'KES '+fmt(s.total_amount)]),styles:{fontSize:8,cellPadding:2.5,fillColor:[17,29,56],textColor:[232,237,248]},headStyles:{fillColor:[15,30,61],textColor:[240,165,0],fontStyle:'bold'},alternateRowStyles:{fillColor:[22,32,64]},margin:{left:14,right:14}});
+  }
+  if((d.top_products||[]).length){
+    const y=doc.lastAutoTable?doc.lastAutoTable.finalY+10:120;
+    doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(232,237,248);doc.text('Top Products',14,y);
+    doc.autoTable({startY:y+4,head:[['Rank','Product','Qty Sold','Revenue']],body:d.top_products.map((p,i)=>['#'+(i+1),p.name,String(p.total_qty),'KES '+fmt(p.total_rev)]),styles:{fontSize:8,cellPadding:2.5,fillColor:[17,29,56],textColor:[232,237,248]},headStyles:{fillColor:[15,30,61],textColor:[240,165,0],fontStyle:'bold'},alternateRowStyles:{fillColor:[22,32,64]},margin:{left:14,right:14}});
+  }
+  doc.save('dashboard.pdf');showToast('PDF downloaded ✓');
+}
+
+function showToast(msg,type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;setTimeout(()=>t.classList.remove('show'),3500);}
+loadMe();loadDashboard();
+setInterval(loadDashboard,60000);
+</script>
+</body>
+</html>
